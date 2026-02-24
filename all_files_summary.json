@@ -1,0 +1,18 @@
+{
+  "backend/main.mo": "Motoko actor that stores payment records in a map and exposes `submitPayment` (write) and `getAllPayments` (query, sorted by name) endpoints.",
+  "feature_evidence.json": "Feature evidence report documenting the light-theme replacement feature, listing the affected frontend files and confirming high confidence via test REQ-8.",
+  "frontend-file-summaries.txt": "JSON document providing one-line descriptions of each frontend source file, serving as a quick reference for the project's frontend structure.",
+  "frontend/index.css": "Tailwind base stylesheet defining OKLCH-based CSS custom properties for light and dark theme tokens (background, foreground, card, accent, etc.).",
+  "frontend/index.html": "Minimal HTML entry point that mounts the React app into a `#root` div and loads the main TypeScript module.",
+  "frontend/src/App.tsx": "Root React component that simply renders the `PaymentPage` as the sole view.",
+  "frontend/src/components/PaymentForm.tsx": "Payment form component with field-level validation display, amber/light theme styling, a loading state during submission, and a success confirmation screen after payment.",
+  "frontend/src/hooks/useActor.ts": "React Query hook that creates and caches an ICP backend actor, recreating it when the Internet Identity changes and invalidating dependent queries accordingly.",
+  "frontend/src/hooks/useInternetIdentity.ts": "Context provider and hook for Internet Identity authentication, managing AuthClient lifecycle, login/logout, and exposing identity and status to the component tree.",
+  "frontend/src/hooks/usePaymentForm.ts": "Custom hook managing payment form state, per-field validation logic, auto-formatting for card number and expiry date, and form reset functionality.",
+  "frontend/src/hooks/useQueries.ts": "React Query mutation hook that calls the backend `submitPayment` actor method and invalidates the payments query cache on success.",
+  "frontend/src/index.css": "Global CSS file that imports Google Fonts, sets up Tailwind directives, defines a light-theme OKLCH color palette (neutral and amber/gold), and declares reusable component classes for payment card, input, and gold button styles.",
+  "frontend/src/main.tsx": "React app entry point that wraps the App component with QueryClientProvider and InternetIdentityProvider, then mounts it to the DOM root.",
+  "frontend/src/pages/PaymentPage.tsx": "Full-page layout component for the payment UI, including a sticky header with branding, trust badges, the PaymentForm component, and a footer with a caffeine.ai attribution link.",
+  "frontend/tailwind.config.js": "Tailwind CSS configuration that extends the theme with OKLCH-based color tokens (neutral, amber, semantic UI colors), custom border radii, box shadows, font families, and animation keyframes, while enabling typography, container-queries, and animate plugins.",
+  "project_state.json": "Project state metadata file tracking the current version, feature history (payment form, fintech theme, light theme), and pending new feature requests including a backend actor for storing payment submissions."
+}

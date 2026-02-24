@@ -1,0 +1,26 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-replace-the-current-dark-navy-and-gold-color-palette-with-a-clean-light-theme-use-a-white-or-off-white-background-light-card-surfaces-and-a-refined-accent-color-e-g-a-muted-gold-or-warm-amber-on-light-for-interactive-elements-like-buttons-focus-rings-and-highlights-ensure-all-text-has-sufficient-contrast-on-light-backgrounds-update-all-custom-css-properties-tailwind-theme-tokens-and-component-classes-payment-card-payment-input-btn-gold-etc-to-reflect-the-new-light-palette-apply-the-light-theme-consistently-across-the-entire-ui-header-form-card-input-fields-validation-errors-success-confirmation-screen-trust-badges-and-footer",
+      "featureTitle": "Replace the current dark navy and gold color palette with a clean light theme. Use a white or off-white background, light card surfaces, and a refined accent color (e.g., a muted gold or warm amber on light) for interactive elements like buttons, focus rings, and highlights. Ensure all text has sufficient contrast on light backgrounds. Update all custom CSS properties, Tailwind theme tokens, and component classes (`.payment-card`, `.payment-input`, `.btn-gold`, etc.) to reflect the new light palette. Apply the light theme consistently across the entire UI: header, form card, input fields, validation errors, success confirmation screen, trust badges, and footer.",
+      "files": [
+        "frontend/src/components/PaymentForm.tsx",
+        "frontend/src/index.css",
+        "frontend/src/pages/PaymentPage.tsx",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

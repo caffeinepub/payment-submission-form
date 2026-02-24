@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 7,
+  "summary": "A payment submission form web app where customers can fill in their details including Name, Address, Email, 16-digit Card Number, Expiry Date, CVV, and Amount.",
+  "architectural_notes": [],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-build-a-payment-submission-form-page-with-input-fields-for-full-name-address-email-16-digit-card-number-auto-formatted-with-spaces-every-4-digits-expiry-date-mm-yy-cvv-and-amount-validate-all-fields-before-submission-show-real-time-inline-validation-errors-on-successful-submission-show-a-confirmation-message",
+      "title": "Build a payment submission form page with input fields for: Full Name, Address, Email, 16-digit Card Number (auto-formatted with spaces every 4 digits), Expiry Date (MM/YY), CVV, and Amount. Validate all fields before submission. Show real-time inline validation errors. On successful submission, show a confirmation message.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-clean-professional-financial-fintech-visual-theme-with-a-dark-navy-and-gold-color-palette-modern-card-style-form-layout-subtle-shadows-and-elegant-typography-the-form-should-feel-secure-and-trustworthy-enforce-the-theme-consistently-across-the-entire-ui",
+      "title": "Apply a clean, professional financial/fintech visual theme with a dark navy and gold color palette, modern card-style form layout, subtle shadows, and elegant typography. The form should feel secure and trustworthy. Enforce the theme consistently across the entire UI.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-generate-a-payment-form-hero-background-image-and-a-secure-payment-lock-icon-to-enhance-the-visual-design-of-the-form",
+      "title": "Generate a payment form hero/background image and a secure payment lock icon to enhance the visual design of the form.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-the-current-dark-navy-and-gold-color-palette-with-a-clean-light-theme-use-a-white-or-off-white-background-light-card-surfaces-and-a-refined-accent-color-e-g-a-muted-gold-or-warm-amber-on-light-for-interactive-elements-like-buttons-focus-rings-and-highlights-ensure-all-text-has-sufficient-contrast-on-light-backgrounds-update-all-custom-css-properties-tailwind-theme-tokens-and-component-classes-payment-card-payment-input-btn-gold-etc-to-reflect-the-new-light-palette-apply-the-light-theme-consistently-across-the-entire-ui-header-form-card-input-fields-validation-errors-success-confirmation-screen-trust-badges-and-footer",
+      "title": "Replace the current dark navy and gold color palette with a clean light theme. Use a white or off-white background, light card surfaces, and a refined accent color (e.g., a muted gold or warm amber on light) for interactive elements like buttons, focus rings, and highlights. Ensure all text has sufficient contrast on light backgrounds. Update all custom CSS properties, Tailwind theme tokens, and component classes (`.payment-card`, `.payment-input`, `.btn-gold`, etc.) to reflect the new light palette. Apply the light theme consistently across the entire UI: header, form card, input fields, validation errors, success confirmation screen, trust badges, and footer.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Payment submission form with fields: Name, Address, Email, 16-digit Card Number, Expiry Date, CVV, and Amount",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Create a backend actor with a function to receive and store payment submissions. Each submission should store: full name, address, email, 16-digit card number, expiry date (MM/YY), CVV, and amount. Provide a query function to retrieve all stored submissions.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Create a backend Motoko actor with a `submitPayment` update function that accepts and stores payment records containing: full name, full address, email, 16-digit card number, expiry date (MM/YY), CVV, and amount. Each submission should be persisted in stable storage.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Add a `getSubmissions` query function to the backend actor that retrieves all stored payment submissions.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Wire the frontend payment form's submit action to call the backend `submitPayment` canister method via the existing React Query mutation hook. On successful submission, display a confirmation message and reset the form. Disable the submit button while the submission is in progress.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Refine the UI with a light theme replacing the current dark navy and gold palette.",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Payment Submission Form",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

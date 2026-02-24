@@ -1,0 +1,47 @@
+{
+  "kind": "build_request",
+  "title": "Refine UI with light theme",
+  "projectName": "SecurePay",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-8",
+      "text": "Replace the current dark navy and gold color palette with a clean light theme. Use a white or off-white background, light card surfaces, and a refined accent color (e.g., a muted gold or warm amber on light) for interactive elements like buttons, focus rings, and highlights. Ensure all text has sufficient contrast on light backgrounds. Update all custom CSS properties, Tailwind theme tokens, and component classes (`.payment-card`, `.payment-input`, `.btn-gold`, etc.) to reflect the new light palette. Apply the light theme consistently across the entire UI: header, form card, input fields, validation errors, success confirmation screen, trust badges, and footer.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "refine it with light theme"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The page background is white or a light neutral tone — dark navy background is removed.",
+        "The form card uses a light surface color with subtle shadow instead of a dark card style.",
+        "Input fields have a light background with dark text and clearly visible borders.",
+        "The primary action button uses the accent color (e.g., warm gold/amber) on a light base, maintaining readability.",
+        "Inline validation error messages are visible and appropriately styled on light backgrounds.",
+        "The success confirmation screen follows the light theme consistently.",
+        "The header and footer are updated to use light theme colors.",
+        "All text elements have sufficient contrast ratio on their light backgrounds.",
+        "No remnants of the dark navy palette remain in the UI."
+      ]
+    }
+  ],
+  "constraints": [
+    "Do not alter backend logic or data models.",
+    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
+    "Preserve all existing form functionality, validation logic, and submission behavior."
+  ],
+  "nonGoals": [
+    "Adding new form fields or changing form validation rules.",
+    "Changing backend canister logic.",
+    "Adding dark mode toggle or theme switcher.",
+    "Changing fonts or typography scale."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

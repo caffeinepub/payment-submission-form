@@ -1,0 +1,44 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Refine UI with light theme",
+  "requirements": [
+    {
+      "id": "REQ-8",
+      "summary": "Replace dark navy and gold palette with a clean light theme across the entire payment UI",
+      "acceptanceCriteria": [
+        "The page background is white or a light neutral tone — dark navy background is removed.",
+        "The form card uses a light surface color with subtle shadow instead of a dark card style.",
+        "Input fields have a light background with dark text and clearly visible borders.",
+        "The primary action button uses the accent color (e.g., warm gold/amber) on a light base, maintaining readability.",
+        "Inline validation error messages are visible and appropriately styled on light backgrounds.",
+        "The success confirmation screen follows the light theme consistently.",
+        "The header and footer are updated to use light theme colors.",
+        "All text elements have sufficient contrast ratio on their light backgrounds.",
+        "No remnants of the dark navy palette remain in the UI."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Replace OKLCH-based CSS custom properties with light theme tokens. Update background colors to white/off-white, define light card surfaces, replace dark navy with light neutrals, update gold accent to a warm amber or muted gold suitable for light backgrounds, and ensure all text color tokens provide sufficient contrast. Update component classes `.payment-card`, `.payment-input`, `.btn-gold`, error styles, and any other design system tokens to reflect the light palette. Remove all dark navy color references."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Update Tailwind theme extensions to replace custom navy/gold OKLCH color palettes with light theme equivalents. Define light background colors, light card surfaces, muted warm accent colors for interactive elements, and appropriate text color scales that maintain contrast on light backgrounds. Ensure border, shadow, and ring utilities align with the light design system."
+        },
+        {
+          "path": "frontend/src/pages/PaymentPage.tsx",
+          "operation": "modify",
+          "description": "Update the full-page layout to use light theme colors. Replace dark background with white or light neutral, update header and footer text colors for contrast on light backgrounds, adjust trust badge styling to work on light surfaces, and ensure the blurred background image (frontend/public/assets/generated/payment-bg.dim_1920x1080.png) is either removed or styled to support the light theme aesthetic without conflicting with readability."
+        },
+        {
+          "path": "frontend/src/components/PaymentForm.tsx",
+          "operation": "modify",
+          "description": "Update the payment form component to use light theme styling. Ensure the form card uses a light surface color with subtle shadow, input fields have light backgrounds with dark text and visible borders, validation error messages are clearly visible on light backgrounds, the loading state uses light-appropriate colors, and the success confirmation screen follows the light theme consistently. Update all button classes (e.g., `.btn-gold`) to use the new accent color suitable for light backgrounds."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+
+    /* Neutral palette (warm whites and grays) */
+    --neutral-50:  0.985 0.002 75;
+    --neutral-100: 0.965 0.004 75;
+    --neutral-200: 0.930 0.006 75;
+    --neutral-300: 0.880 0.008 75;
+    --neutral-400: 0.720 0.010 75;
+    --neutral-500: 0.560 0.010 75;
+    --neutral-600: 0.420 0.010 75;
+    --neutral-700: 0.320 0.008 75;
+    --neutral-800: 0.220 0.006 75;
+    --neutral-900: 0.140 0.004 75;
+
+    /* Amber/gold accent palette */
+    --amber-600: 0.62 0.14 60;
+    --amber-500: 0.72 0.16 60;
+    --amber-400: 0.80 0.15 60;
+    --amber-300: 0.88 0.11 60;
+    --amber-100: 0.97 0.04 60;
+
+    /* Semantic tokens — light theme */
+    --background: var(--neutral-50);
+    --foreground: var(--neutral-900);
+    --card: 1 0 0;
+    --card-foreground: var(--neutral-900);
+    --popover: 1 0 0;
+    --popover-foreground: var(--neutral-900);
+    --primary: var(--amber-500);
+    --primary-foreground: 1 0 0;
+    --secondary: var(--neutral-100);
+    --secondary-foreground: var(--neutral-800);
+    --muted: var(--neutral-100);
+    --muted-foreground: var(--neutral-500);
+    --accent: var(--neutral-100);
+    --accent-foreground: var(--neutral-800);
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.985 0 0;
+    --border: var(--neutral-200);
+    --input: var(--neutral-200);
+    --ring: var(--amber-500);
+    --chart-1: 0.646 0.222 41.116;
+    --chart-2: 0.6 0.118 184.704;
+    --chart-3: 0.398 0.07 227.392;
+    --chart-4: 0.828 0.189 84.429;
+    --chart-5: 0.769 0.188 70.08;
+    --sidebar: 1 0 0;
+    --sidebar-foreground: var(--neutral-900);
+    --sidebar-primary: var(--amber-500);
+    --sidebar-primary-foreground: 1 0 0;
+    --sidebar-accent: var(--neutral-100);
+    --sidebar-accent-foreground: var(--neutral-800);
+    --sidebar-border: var(--neutral-200);
+    --sidebar-ring: var(--amber-500);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .payment-card {
+    @apply rounded-2xl overflow-hidden;
+    background: oklch(1 0 0);
+    border: 1px solid oklch(0.920 0.006 75);
+    box-shadow:
+      0 1px 3px oklch(0.140 0.004 75 / 0.06),
+      0 8px 24px -4px oklch(0.140 0.004 75 / 0.10),
+      0 24px 48px -8px oklch(0.140 0.004 75 / 0.08);
+  }
+
+  .payment-input {
+    background: oklch(0.985 0.002 75) !important;
+    border-color: oklch(0.880 0.008 75) !important;
+    color: oklch(0.140 0.004 75) !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .payment-input::placeholder {
+    color: oklch(0.720 0.010 75 / 0.7) !important;
+  }
+
+  .payment-input:focus-visible {
+    border-color: oklch(0.72 0.16 60 / 0.8) !important;
+    box-shadow: 0 0 0 3px oklch(0.72 0.16 60 / 0.12) !important;
+    outline: none !important;
+  }
+
+  .btn-gold {
+    background: linear-gradient(135deg, oklch(0.72 0.16 60), oklch(0.62 0.14 60)) !important;
+    color: oklch(1 0 0) !important;
+    border: none !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.01em;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 14px oklch(0.72 0.16 60 / 0.30) !important;
+  }
+
+  .btn-gold:hover:not(:disabled) {
+    background: linear-gradient(135deg, oklch(0.80 0.15 60), oklch(0.72 0.16 60)) !important;
+    box-shadow: 0 6px 20px oklch(0.72 0.16 60 / 0.40) !important;
+    transform: translateY(-1px);
+  }
+
+  .btn-gold:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px oklch(0.72 0.16 60 / 0.20) !important;
+  }
+
+  .btn-gold:disabled {
+    opacity: 0.55 !important;
+    cursor: not-allowed !important;
+  }
+}

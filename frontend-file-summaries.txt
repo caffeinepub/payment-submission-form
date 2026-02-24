@@ -1,0 +1,10 @@
+{
+  "frontend/src/App.tsx": "Root application component that renders the PaymentPage as the main view.",
+  "frontend/src/hooks/useQueries.ts": "React Query hook for submitting payment data to the backend canister via the submitPayment mutation.",
+  "frontend/src/hooks/usePaymentForm.ts": "Custom hook managing all payment form state, field-level validation (email, card number, expiry, CVV, amount), auto-formatting for card number (spaces every 4 digits) and expiry date (MM/YY), and form reset logic.",
+  "frontend/src/components/PaymentForm.tsx": "Payment form component updated to light theme — white card surface, neutral text, amber accent labels and icons, light input fields with dark text, red-50 error states, and amber-styled success confirmation screen.",
+  "frontend/src/pages/PaymentPage.tsx": "Full-page light-theme layout with white header/footer, warm neutral background, amber accent trust badges, and a subtle top gradient bar — dark navy background and overlays removed.",
+  "frontend/src/index.css": "Global styles with OKLCH-based light theme — warm white/neutral palette replacing dark navy, warm amber accent replacing gold, updated semantic tokens for light backgrounds, and refined component classes for `.payment-card`, `.payment-input`, and `.btn-gold` suited to a light surface.",
+  "frontend/tailwind.config.js": "Extended Tailwind config with DM Sans font, light neutral and amber color palettes mapped to OKLCH CSS variables, and updated card/amber-glow shadow utilities replacing the old navy/gold dark theme.",
+  "No files were modified — the existing frontend implementation already satisfies all acceptance criteria": "`useQueries.ts` calls `actor.submitPayment` with all required parameters, `PaymentForm.tsx` disables the submit button during pending state, shows a success confirmation screen on completion, and resets the form fields after successful submission."
+}
