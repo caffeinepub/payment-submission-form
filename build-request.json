@@ -1,56 +1,38 @@
 {
   "kind": "build_request",
-  "title": "Fix admin panel not displaying full payment details after login",
+  "title": "Fix 'Payment service not ready' error on payment form submission",
+  "projectName": "Payment Terminal",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-15",
-      "text": "Fix the AdminPage so that after a successful Internet Identity login, the full payments table is rendered and populated with all payment records. Ensure the authentication state is correctly detected post-login (i.e., the component re-evaluates the `isAuthenticated` flag after the login flow completes and the actor is ready), and that `useGetAllPayments` is triggered and its data is displayed in the table rather than the login gate or an empty/loading state.",
+      "id": "REQ-31",
+      "text": "Diagnose and fix the 'Payment service not ready. Please wait a moment and try again.' error shown when submitting the payment form. Audit the actor initialization flow in `useActor.ts` and the `useSubmitPayment` mutation in `useQueries.ts`: ensure the anonymous actor is fully initialized and non-null before the mutation is allowed to fire (gate the mutation on `!!actor`). If the actor is not yet ready at submission time, surface a user-friendly loading state (e.g., disable the submit button with a spinner) rather than immediately throwing an error. Add at least 2 automatic retries with exponential back-off in `useSubmitPayment` for transient initialization or network errors so that brief actor startup delays do not surface as immediate failures.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "I am unable to see full details in admin panel after login"
+          "Payment service not ready. Please wait a moment and try again."
         ]
       },
       "acceptanceCriteria": [
-        "After logging in via Internet Identity on the AdminPage, the login gate is replaced by the payments table.",
-        "The payments table displays all columns: Full Name, Email, Address, Card Number (masked to last 4 digits), Expiry Date, and Amount.",
-        "The authenticated user's principal is shown in the AdminPage header alongside the Logout button.",
-        "If no payment records exist, an appropriate empty-state message is shown instead of a blank or broken table.",
-        "Logging out from the AdminPage returns the user to the login gate view."
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "text": "Ensure the `useGetAllPayments` React Query hook in `useQueries.ts` correctly uses the authenticated actor (not the anonymous actor) after login, so that the backend `getAllPayments` query executes successfully and returns data once the user is authenticated. Invalidate or refetch the query when the actor/identity changes.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "I am unable to see full details in admin panel after login"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The `useGetAllPayments` hook uses the actor provided by `useActor`, which reflects the current authenticated identity.",
-        "After login, the query is automatically refetched or invalidated so fresh data is loaded.",
-        "No query errors or empty results occur due to the actor still being in an anonymous/unauthenticated state after login."
+        "Submitting the payment form no longer shows 'Payment service not ready. Please wait a moment and try again.' when the actor is initializing.",
+        "The submit button is disabled (with a loading indicator) while the actor is not yet ready, preventing premature submission.",
+        "The `useSubmitPayment` mutation in `useQueries.ts` is gated with `enabled`/`mutationFn` guard so it does not execute until the actor instance is non-null.",
+        "Transient actor or network errors during submission are retried at least 2 times with exponential back-off before surfacing an error to the user.",
+        "After the actor is ready, a valid form submission completes successfully and shows the confirmation screen."
       ]
     }
   ],
   "constraints": [
-    "Do not modify any file under frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts.",
-    "Do not alter the backend schema or the getAllPayments endpoint.",
-    "Preserve the existing light amber/neutral theme across all AdminPage UI changes."
+    "Do not modify files under frontend/src/hooks/useActor.ts, frontend/src/hooks/useInternetIdentity.ts, or frontend/src/main.tsx (immutable paths).",
+    "All Motoko logic must remain in backend/main.mo — do not split into multiple actors."
   ],
   "nonGoals": [
-    "Adding new columns or fields to the payments table.",
-    "Changing the authentication provider or flow.",
-    "Modifying the PaymentPage or PaymentForm components."
+    "Changing the visual design or theme of the payment form.",
+    "Modifying the AdminPage or its data-fetch chain.",
+    "Altering the backend canister's submitPayment method signature."
   ],
   "imageRequirements": {
     "required": [],

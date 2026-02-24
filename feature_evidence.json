@@ -2,27 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-adminpage-so-that-after-a-successful-internet-identity-login-the-full-payments-table-is-rendered-and-populated-with-all-payment-records-ensure-the-authentication-state-is-correctly-detected-post-login-i-e-the-component-re-evaluates-the-isauthenticated-flag-after-the-login-flow-completes-and-the-actor-is-ready-and-that-usegetallpayments-is-triggered-and-its-data-is-displayed-in-the-table-rather-than-the-login-gate-or-an-empty-loading-state",
-      "featureTitle": "Fix the AdminPage so that after a successful Internet Identity login, the full payments table is rendered and populated with all payment records. Ensure the authentication state is correctly detected post-login (i.e., the component re-evaluates the `isAuthenticated` flag after the login flow completes and the actor is ready), and that `useGetAllPayments` is triggered and its data is displayed in the table rather than the login gate or an empty/loading state.",
+      "featureId": "feature-diagnose-and-fix-the-payment-service-not-ready-please-wait-a-moment-and-try-again-error-shown-when-submitting-the-payment-form-audit-the-actor-initialization-flow-in-useactor-ts-and-the-usesubmitpayment-mutation-in-usequeries-ts-ensure-the-anonymous-actor-is-fully-initialized-and-non-null-before-the-mutation-is-allowed-to-fire-gate-the-mutation-on-actor-if-the-actor-is-not-yet-ready-at-submission-time-surface-a-user-friendly-loading-state-e-g-disable-the-submit-button-with-a-spinner-rather-than-immediately-throwing-an-error-add-at-least-2-automatic-retries-with-exponential-back-off-in-usesubmitpayment-for-transient-initialization-or-network-errors-so-that-brief-actor-startup-delays-do-not-surface-as-immediate-failures",
+      "featureTitle": "Diagnose and fix the 'Payment service not ready. Please wait a moment and try again.' error shown when submitting the payment form. Audit the actor initialization flow in `useActor.ts` and the `useSubmitPayment` mutation in `useQueries.ts`: ensure the anonymous actor is fully initialized and non-null before the mutation is allowed to fire (gate the mutation on `!!actor`). If the actor is not yet ready at submission time, surface a user-friendly loading state (e.g., disable the submit button with a spinner) rather than immediately throwing an error. Add at least 2 automatic retries with exponential back-off in `useSubmitPayment` for transient initialization or network errors so that brief actor startup delays do not surface as immediate failures.",
       "files": [
-        "frontend/src/pages/AdminPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-15"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-the-usegetallpayments-react-query-hook-in-usequeries-ts-correctly-uses-the-authenticated-actor-not-the-anonymous-actor-after-login-so-that-the-backend-getallpayments-query-executes-successfully-and-returns-data-once-the-user-is-authenticated-invalidate-or-refetch-the-query-when-the-actor-identity-changes",
-      "featureTitle": "Ensure the `useGetAllPayments` React Query hook in `useQueries.ts` correctly uses the authenticated actor (not the anonymous actor) after login, so that the backend `getAllPayments` query executes successfully and returns data once the user is authenticated. Invalidate or refetch the query when the actor/identity changes.",
-      "files": [
+        "frontend/src/components/PaymentForm.tsx",
         "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
@@ -30,10 +13,14 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0",
+        "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-16"
+        "REQ-31"
       ],
       "confidence": "high"
     }

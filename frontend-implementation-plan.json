@@ -1,39 +1,28 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix admin panel payment details display after login",
+  "title": "Fix 'Payment service not ready' error on payment form submission",
   "requirements": [
     {
-      "id": "REQ-15",
-      "summary": "Fix AdminPage to render full payments table after Internet Identity login by ensuring authentication state is correctly detected post-login and useGetAllPayments is triggered",
+      "id": "REQ-31",
+      "summary": "Fix the 'Payment service not ready' error by ensuring the actor is fully initialized before allowing payment submission, adding retry logic with exponential back-off, and surfacing a user-friendly loading state when the actor is not yet ready",
       "acceptanceCriteria": [
-        "After logging in via Internet Identity on the AdminPage, the login gate is replaced by the payments table.",
-        "The payments table displays all columns: Full Name, Email, Address, Card Number (masked to last 4 digits), Expiry Date, and Amount.",
-        "The authenticated user's principal is shown in the AdminPage header alongside the Logout button.",
-        "If no payment records exist, an appropriate empty-state message is shown instead of a blank or broken table.",
-        "Logging out from the AdminPage returns the user to the login gate view."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/AdminPage.tsx",
-          "operation": "modify",
-          "description": "Refactor AdminPage to properly react to authentication state changes after login. Add useEffect to monitor isAuthenticated and identity changes, ensuring the component re-renders when the user completes the login flow. Ensure the payments table is conditionally rendered based on isAuthenticated state, replacing the login gate. Add proper loading states during the authentication transition. Verify that the principal display and logout functionality work correctly in the authenticated state. Ensure an appropriate empty-state message is shown when no payment records exist."
-        }
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "summary": "Ensure useGetAllPayments hook uses the authenticated actor and refetches after login by correctly integrating with useActor and invalidating queries on identity changes",
-      "acceptanceCriteria": [
-        "The `useGetAllPayments` hook uses the actor provided by `useActor`, which reflects the current authenticated identity.",
-        "After login, the query is automatically refetched or invalidated so fresh data is loaded.",
-        "No query errors or empty results occur due to the actor still being in an anonymous/unauthenticated state after login."
+        "Submitting the payment form no longer shows 'Payment service not ready. Please wait a moment and try again.' when the actor is initializing.",
+        "The submit button is disabled (with a loading indicator) while the actor is not yet ready, preventing premature submission.",
+        "The `useSubmitPayment` mutation in `useQueries.ts` is gated with `enabled`/`mutationFn` guard so it does not execute until the actor instance is non-null.",
+        "Transient actor or network errors during submission are retried at least 2 times with exponential back-off before surfacing an error to the user.",
+        "After the actor is ready, a valid form submission completes successfully and shows the confirmation screen."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update useGetAllPayments hook to properly depend on the authenticated actor from useActor. Add a query key that includes the identity/principal to ensure the query is invalidated when authentication state changes. Configure the query to be enabled only when the actor is authenticated (not anonymous). Ensure the query automatically refetches when the actor transitions from anonymous to authenticated state. Add proper error handling for cases where the actor is not yet ready or authentication has not completed."
+          "description": "Modify the useSubmitPayment mutation to gate execution on actor readiness by checking `!!actor` before allowing the mutationFn to fire. Add retry logic with at least 2 retries and exponential back-off (e.g., using React Query's `retry` and `retryDelay` options) to handle transient actor initialization or network errors gracefully. Ensure the mutation does not execute if the actor is null, preventing premature 'Payment service not ready' errors."
+        },
+        {
+          "path": "frontend/src/components/PaymentForm.tsx",
+          "operation": "modify",
+          "description": "Update the PaymentForm component to detect when the actor is not yet ready (using the `isFetching` state from useActor) and disable the submit button with a loading spinner or indicator during actor initialization. Ensure the form does not allow submission until the actor is fully initialized and non-null. Add visual feedback (e.g., 'Connecting to payment service...') so users understand the system is initializing. Wire the mutation's retry state to show appropriate feedback if retries are in progress."
         }
       ]
     }

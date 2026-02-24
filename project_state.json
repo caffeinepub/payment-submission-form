@@ -1,10 +1,12 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 13,
-  "summary": "A payment submission form web app where customers can fill in their details including Name, Address, Email, 16-digit Card Number, Expiry Date, CVV, and Amount.",
+  "projectStateVersion": 23,
+  "summary": "A payment submission form web app where customers can fill in their details including Name, Address, Email, 16-digit Card Number, Expiry Date, CVV, and Amount. The app features a clean light theme (white/off-white background, amber/gold accent).",
   "architectural_notes": [],
   "known_issues": [
-    "Admin panel does not display full payment details after login"
+    "Admin panel fails to load payments after login — shows 'Failed to load payments, please try refreshing' error",
+    "Payment submission fails with 'Payment submission failed. Please try again.' error",
+    "Payment form shows 'Payment service not ready. Please wait a moment and try again.' error on submission"
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -103,6 +105,126 @@
         "REQ-16"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-diagnose-and-fix-the-root-cause-of-the-failed-to-load-payments-please-try-refreshing-the-page-error-shown-in-adminpage-investigate-the-usegetallpayments-hook-in-usequeries-ts-and-the-getallpayments-call-in-adminpage-tsx-ensure-the-query-does-not-execute-until-the-authenticated-actor-is-fully-ready-i-e-the-actor-instance-is-non-null-and-reflects-the-logged-in-identity-add-robust-error-handling-so-that-transient-actor-initialization-errors-are-retried-automatically-e-g-via-react-query-s-retry-option-rather-than-immediately-surfacing-an-error-state-to-the-user",
+      "title": "Diagnose and fix the root cause of the 'Failed to load payments — Please try refreshing the page' error shown in AdminPage. Investigate the `useGetAllPayments` hook in `useQueries.ts` and the `getAllPayments` call in `AdminPage.tsx`. Ensure the query does not execute until the authenticated actor is fully ready (i.e., the actor instance is non-null and reflects the logged-in identity). Add robust error handling so that transient actor initialization errors are retried automatically (e.g., via React Query's `retry` option) rather than immediately surfacing an error state to the user.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-useactor-hook-in-the-frontend-correctly-signals-actor-readiness-after-internet-identity-login-completes-the-actor-instance-exposed-to-consumers-must-only-be-considered-ready-once-the-underlying-authclient-has-fully-resolved-and-the-identity-has-been-applied-any-dependent-react-query-hooks-such-as-usegetallpayments-must-re-evaluate-their-enabled-state-and-re-fetch-when-the-actor-transitions-from-anonymous-uninitialized-to-authenticated",
+      "title": "Ensure the `useActor` hook in the frontend correctly signals actor readiness after Internet Identity login completes. The actor instance exposed to consumers must only be considered 'ready' once the underlying `AuthClient` has fully resolved and the identity has been applied. Any dependent React Query hooks (such as `useGetAllPayments`) must re-evaluate their enabled state and re-fetch when the actor transitions from anonymous/uninitialized to authenticated.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-adminpage-tsx-replace-the-current-immediate-error-display-on-usegetallpayments-failure-with-a-loading-retry-state-during-the-actor-initialization-window-show-the-failed-to-load-payments-error-message-only-after-all-automatic-retries-are-exhausted-and-the-actor-is-confirmed-to-be-in-an-authenticated-ready-state",
+      "title": "In `AdminPage.tsx`, replace the current immediate error display on `useGetAllPayments` failure with a loading/retry state during the actor initialization window. Show the 'Failed to load payments' error message only after all automatic retries are exhausted and the actor is confirmed to be in an authenticated, ready state.",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-diagnose-and-fix-the-payment-submission-failed-please-try-again-error-in-the-payment-form-inspect-the-usesubmitpayment-mutation-hook-in-usequeries-ts-and-the-submitpayment-call-in-paymentform-tsx-ensure-the-anonymous-actor-is-correctly-initialised-before-the-mutation-fires-that-the-canister-method-signature-matches-the-frontend-call-arguments-and-that-any-rejection-from-the-backend-is-surfaced-with-a-descriptive-error-message-rather-than-a-generic-failure-string-add-retry-logic-at-least-2-retries-for-transient-network-errors",
+      "title": "Diagnose and fix the 'Payment submission failed. Please try again.' error in the payment form. Inspect the `useSubmitPayment` mutation hook in `useQueries.ts` and the `submitPayment` call in `PaymentForm.tsx`. Ensure the anonymous actor is correctly initialised before the mutation fires, that the canister method signature matches the frontend call arguments, and that any rejection from the backend is surfaced with a descriptive error message rather than a generic failure string. Add retry logic (at least 2 retries) for transient network errors.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-a-pos-machine-credit-card-terminal-visual-theme-to-the-entire-payment-ui-the-design-should-evoke-a-physical-point-of-sale-terminal-a-dark-charcoal-or-gunmetal-device-body-background-a-raised-card-slot-or-card-reader-panel-housing-the-form-bright-accent-leds-rendered-as-small-colored-dots-or-status-indicators-monospaced-or-ocr-style-typography-for-card-number-and-amount-fields-a-tactile-keypad-aesthetic-for-the-submit-button-beveled-slightly-embossed-a-card-illustration-or-silhouette-integrated-into-the-header-or-form-card-and-subtle-scan-line-or-texture-overlays-to-suggest-hardware-apply-the-theme-consistently-across-the-paymentpage-header-form-card-input-fields-validation-errors-success-confirmation-screen-trust-badges-footer-and-the-adminpage-table",
+      "title": "Apply a POS machine / credit card terminal visual theme to the entire payment UI. The design should evoke a physical point-of-sale terminal: a dark charcoal or gunmetal device body background, a raised card-slot or card-reader panel housing the form, bright accent LEDs rendered as small colored dots or status indicators, monospaced or OCR-style typography for card number and amount fields, a tactile 'keypad' aesthetic for the submit button (beveled, slightly embossed), a card illustration or silhouette integrated into the header or form card, and subtle scan-line or texture overlays to suggest hardware. Apply the theme consistently across the PaymentPage header, form card, input fields, validation errors, success confirmation screen, trust badges, footer, and the AdminPage table.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-index-css-and-frontend-tailwind-config-js-to-replace-the-current-warm-neutral-amber-oklch-palette-with-a-pos-terminal-palette-primary-device-body-color-dark-charcoal-1c1c1e-or-gunmetal-2d3142-a-bright-accent-e-g-electric-green-00e676-or-amber-yellow-ffb300-for-active-focus-states-and-status-indicators-off-white-f5f5f5-for-input-surfaces-and-monospaced-font-e-g-courier-prime-or-share-tech-mono-for-card-amount-fields-update-all-component-classes-payment-card-payment-input-btn-gold-etc-to-reflect-the-new-palette",
+      "title": "Update `frontend/src/index.css` and `frontend/tailwind.config.js` to replace the current warm neutral / amber OKLCH palette with a POS terminal palette: primary device body color (dark charcoal ~#1C1C1E or gunmetal ~#2D3142), a bright accent (e.g. electric green #00E676 or amber-yellow #FFB300) for active/focus states and status indicators, off-white (#F5F5F5) for input surfaces, and monospaced font (e.g. 'Courier Prime' or 'Share Tech Mono') for card/amount fields. Update all component classes (`.payment-card`, `.payment-input`, `.btn-gold`, etc.) to reflect the new palette.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-index-css-to-remove-all-pos-terminal-dark-charcoal-gunmetal-css-custom-properties-scan-line-overlays-and-device-palette-variables-restore-the-clean-light-theme-white-or-off-white-background-light-card-surfaces-and-amber-gold-accent-color-tokens-matching-the-earlier-light-theme-that-preceded-the-pos-theme",
+      "title": "Update `frontend/src/index.css` to remove all POS terminal / dark charcoal / gunmetal CSS custom properties, scan-line overlays, and device-palette variables. Restore the clean light theme: white or off-white background, light card surfaces, and amber/gold accent color tokens (matching the earlier light theme that preceded the POS theme).",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-tailwind-config-js-to-remove-the-pos-terminal-palette-tokens-dark-charcoal-gunmetal-pos-green-pos-amber-device-palette-remove-the-share-tech-mono-courier-prime-monospaced-font-entries-added-for-the-pos-theme-and-restore-the-warm-neutral-amber-oklch-color-tokens-and-dm-sans-typography-that-were-used-in-the-clean-light-theme",
+      "title": "Update `frontend/tailwind.config.js` to remove the POS terminal palette tokens (dark charcoal, gunmetal, pos-green, pos-amber device palette), remove the Share Tech Mono / Courier Prime monospaced font entries added for the POS theme, and restore the warm neutral / amber OKLCH color tokens and DM Sans typography that were used in the clean light theme.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-frontend-src-pages-paymentpage-tsx-to-remove-all-pos-terminal-visual-elements-dark-device-body-background-scan-line-or-texture-overlays-led-status-indicator-dots-card-slot-panel-styling-and-any-pos-specific-oklch-color-references-restore-a-clean-light-themed-layout-with-white-off-white-background-a-centered-card-style-form-subtle-box-shadows-and-the-amber-gold-accent-remove-any-pos-hero-image-references-and-replace-with-the-existing-payment-form-hero-background-image-asset-if-available",
+      "title": "Refactor `frontend/src/pages/PaymentPage.tsx` to remove all POS terminal visual elements: dark device-body background, scan-line or texture overlays, LED status indicator dots, card-slot panel styling, and any POS-specific oklch color references. Restore a clean light-themed layout with white/off-white background, a centered card-style form, subtle box shadows, and the amber/gold accent. Remove any POS hero image references and replace with the existing payment form hero/background image asset if available.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-frontend-src-components-paymentform-tsx-to-remove-all-pos-terminal-visual-elements-dark-card-reader-panel-background-monospaced-ocr-style-font-on-card-amount-inputs-beveled-embossed-tactile-button-styling-led-indicators-and-card-silhouette-illustration-specific-to-the-pos-theme-restore-the-clean-light-themed-form-card-light-surface-standard-legible-typography-for-all-inputs-a-smooth-amber-gold-submit-button-inline-validation-errors-styled-in-the-light-theme-and-a-clean-success-confirmation-screen",
+      "title": "Refactor `frontend/src/components/PaymentForm.tsx` to remove all POS terminal visual elements: dark card-reader panel background, monospaced OCR-style font on card/amount inputs, beveled/embossed tactile button styling, LED indicators, and card silhouette illustration specific to the POS theme. Restore the clean light-themed form card: light surface, standard legible typography for all inputs, a smooth amber/gold submit button, inline validation errors styled in the light theme, and a clean success confirmation screen.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-frontend-src-components-adminlogingate-tsx-to-remove-pos-terminal-styling-amber-led-indicators-dark-device-body-panel-terminal-specific-classes-and-restore-the-clean-light-themed-login-gate-white-off-white-card-surface-lock-icon-restricted-access-message-and-an-amber-gold-accented-internet-identity-login-button-consistent-with-the-light-theme",
+      "title": "Refactor `frontend/src/components/AdminLoginGate.tsx` to remove POS terminal styling (amber LED indicators, dark device-body panel, terminal-specific classes) and restore the clean light-themed login gate: white/off-white card surface, lock icon, restricted-access message, and an amber/gold-accented Internet Identity login button consistent with the light theme.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-frontend-src-pages-adminpage-tsx-to-remove-pos-terminal-table-styling-dark-backgrounds-monospaced-terminal-fonts-green-accent-rows-and-restore-the-clean-light-themed-admin-table-white-off-white-card-surface-neutral-typography-amber-gold-accent-for-headers-and-interactive-elements-consistent-with-the-light-theme-applied-to-the-rest-of-the-app",
+      "title": "Refactor `frontend/src/pages/AdminPage.tsx` to remove POS terminal table styling (dark backgrounds, monospaced terminal fonts, green accent rows) and restore the clean light-themed admin table: white/off-white card surface, neutral typography, amber/gold accent for headers and interactive elements, consistent with the light theme applied to the rest of the app.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-diagnose-and-fix-the-persistent-failed-to-load-payments-please-try-again-error-on-the-adminpage-audit-the-full-data-fetch-chain-1-useactor-must-expose-a-stable-non-null-actor-reference-only-after-the-authenticated-identity-is-applied-2-usegetallpayments-in-usequeries-ts-must-gate-on-actor-readiness-enabled-actor-isauthenticated-and-configure-at-least-3-automatic-retries-with-exponential-back-off-before-surfacing-an-error-state-3-adminpage-tsx-must-not-render-the-error-ui-while-retries-are-still-in-flight-show-a-loading-spinner-state-instead-4-after-a-successful-internet-identity-login-the-query-must-be-invalidated-refetched-so-the-payments-table-populates-without-requiring-a-manual-refresh",
+      "title": "Diagnose and fix the persistent 'Failed to load payments — Please try again' error on the AdminPage. Audit the full data-fetch chain: (1) `useActor` must expose a stable, non-null actor reference only after the authenticated identity is applied; (2) `useGetAllPayments` in `useQueries.ts` must gate on actor readiness (`enabled: !!actor && isAuthenticated`) and configure at least 3 automatic retries with exponential back-off before surfacing an error state; (3) `AdminPage.tsx` must not render the error UI while retries are still in flight — show a loading/spinner state instead; (4) after a successful Internet Identity login the query must be invalidated/refetched so the payments table populates without requiring a manual refresh.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-credit-card-illustration-visual-element-to-the-payment-form-styled-with-the-existing-clean-light-theme-white-off-white-surfaces-amber-gold-accents-the-card-illustration-should-appear-above-or-alongside-the-form-card-and-depict-a-generic-bank-card-silhouette-with-subtle-chip-and-contactless-payment-iconography-it-must-be-rendered-as-a-static-generated-image-asset-frontend-public-assets-generated-credit-card-light-png-and-integrated-into-paymentform-tsx-or-paymentpage-tsx-without-disrupting-the-existing-form-layout-or-validation-flow",
+      "title": "Add a credit card illustration visual element to the payment form, styled with the existing clean light theme (white/off-white surfaces, amber/gold accents). The card illustration should appear above or alongside the form card and depict a generic bank card silhouette with subtle chip and contactless-payment iconography. It must be rendered as a static generated image asset (`frontend/public/assets/generated/credit-card-light.png`) and integrated into `PaymentForm.tsx` or `PaymentPage.tsx` without disrupting the existing form layout or validation flow.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-diagnose-and-fix-the-payment-service-not-ready-please-wait-a-moment-and-try-again-error-shown-when-submitting-the-payment-form-audit-the-actor-initialization-flow-in-useactor-ts-and-the-usesubmitpayment-mutation-in-usequeries-ts-ensure-the-anonymous-actor-is-fully-initialized-and-non-null-before-the-mutation-is-allowed-to-fire-gate-the-mutation-on-actor-if-the-actor-is-not-yet-ready-at-submission-time-surface-a-user-friendly-loading-state-e-g-disable-the-submit-button-with-a-spinner-rather-than-immediately-throwing-an-error-add-at-least-2-automatic-retries-with-exponential-back-off-in-usesubmitpayment-for-transient-initialization-or-network-errors-so-that-brief-actor-startup-delays-do-not-surface-as-immediate-failures",
+      "title": "Diagnose and fix the 'Payment service not ready. Please wait a moment and try again.' error shown when submitting the payment form. Audit the actor initialization flow in `useActor.ts` and the `useSubmitPayment` mutation in `useQueries.ts`: ensure the anonymous actor is fully initialized and non-null before the mutation is allowed to fire (gate the mutation on `!!actor`). If the actor is not yet ready at submission time, surface a user-friendly loading state (e.g., disable the submit button with a spinner) rather than immediately throwing an error. Add at least 2 automatic retries with exponential back-off in `useSubmitPayment` for transient initialization or network errors so that brief actor startup delays do not surface as immediate failures.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -159,6 +281,12 @@
     {
       "id": "AR-8",
       "summary": "Add authentication to protect the admin panel so only authorized users can access it.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Add a credit card visual element (light theme) to the payment form UI.",
       "reqIds": [],
       "status": "pending"
     }

@@ -17,7 +17,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['DM Sans', 'Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       colors: {
         border: 'oklch(var(--border))',
@@ -70,26 +70,25 @@ export default {
           border: 'oklch(var(--sidebar-border))',
           ring: 'oklch(var(--sidebar-ring))'
         },
-        // Neutral palette (warm whites/grays)
-        neutral: {
-          50:  'oklch(var(--neutral-50))',
-          100: 'oklch(var(--neutral-100))',
-          200: 'oklch(var(--neutral-200))',
-          300: 'oklch(var(--neutral-300))',
-          400: 'oklch(var(--neutral-400))',
-          500: 'oklch(var(--neutral-500))',
-          600: 'oklch(var(--neutral-600))',
-          700: 'oklch(var(--neutral-700))',
-          800: 'oklch(var(--neutral-800))',
-          900: 'oklch(var(--neutral-900))',
-        },
-        // Amber/gold accent palette
+        // Amber/gold accent tokens
         amber: {
-          600: 'oklch(var(--amber-600))',
-          500: 'oklch(var(--amber-500))',
-          400: 'oklch(var(--amber-400))',
-          300: 'oklch(var(--amber-300))',
-          100: 'oklch(var(--amber-100))',
+          400: 'oklch(0.82 0.16 75)',
+          500: 'oklch(0.72 0.17 72)',
+          600: 'oklch(0.62 0.16 70)',
+          700: 'oklch(0.52 0.14 68)',
+        },
+        // Warm neutral tokens
+        neutral: {
+          50:  'oklch(0.985 0.002 60)',
+          100: 'oklch(0.970 0.004 60)',
+          200: 'oklch(0.940 0.006 60)',
+          300: 'oklch(0.880 0.008 60)',
+          400: 'oklch(0.720 0.010 60)',
+          500: 'oklch(0.560 0.010 60)',
+          600: 'oklch(0.420 0.008 60)',
+          700: 'oklch(0.320 0.006 60)',
+          800: 'oklch(0.220 0.005 60)',
+          900: 'oklch(0.140 0.004 60)',
         },
       },
       borderRadius: {
@@ -101,8 +100,9 @@ export default {
       },
       boxShadow: {
         xs: '0 1px 2px 0 rgba(0,0,0,0.04)',
-        'card': '0 8px 24px -4px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06)',
-        'amber-glow': '0 0 20px oklch(0.72 0.16 60 / 0.25)',
+        'card': '0 4px 16px -2px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05)',
+        'card-hover': '0 8px 24px -4px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06)',
+        'amber-glow': '0 4px 14px oklch(0.72 0.17 72 / 0.35)',
       },
       keyframes: {
         'accordion-down': {

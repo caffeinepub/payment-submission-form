@@ -1,15 +1,15 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T18:47:02.771Z",
-  "summary": "Both REQ-15 and REQ-16 appear to be implemented in the diff. AdminPage.tsx was updated to correctly handle authentication state, show loading spinners, display the payments table with all required columns, show the principal in the header with a Logout button, handle empty state, and return to the login gate on logout. useQueries.ts was updated to include the principal in the query key, enable the query only when authenticated and actor is ready, and use staleTime: 0 to ensure fresh data after login.",
+  "generatedAt": "2026-02-24T19:34:15.838Z",
+  "summary": "The diff implements the majority of REQ-31's requirements: the useSubmitPayment mutation in useQueries.ts is gated with an actor-readiness guard, exposes isActorReady, and retries up to 2 times with exponential back-off for transient errors. PaymentForm.tsx disables the submit button (with a spinner and 'Connecting...' label) and shows a banner while the actor is initializing. The success/confirmation screen is retained. All acceptance criteria appear to be met.",
   "missing_requirements": [],
   "hallucinated_features": [],
-  "confidence": 0.82,
+  "confidence": 0.92,
   "changed_files": [
     "frontend-file-summaries.txt",
+    "frontend/src/components/PaymentForm.tsx",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/AdminPage.tsx",
     "project_state.json"
   ]
 }
