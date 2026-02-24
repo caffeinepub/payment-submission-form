@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
+import { useInternetIdentity } from './useInternetIdentity';
 import type { Payment } from '../backend';
 
 export function useSubmitPayment() {
@@ -34,16 +35,21 @@ export function useSubmitPayment() {
 }
 
 export function useGetAllPayments() {
-  const { actor, isFetching } = useActor();
+  const { actor, isFetching: isActorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+
+  const principal = identity?.getPrincipal().toString() ?? null;
 
   return useQuery<Payment[]>({
-    queryKey: ['payments'],
+    // Include principal in query key so the query is re-run when identity changes
+    queryKey: ['payments', principal],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getAllPayments();
     },
-    enabled: !!actor && !isFetching,
-    staleTime: 30_000,
+    // Only fetch when actor is ready AND user is authenticated
+    enabled: !!actor && !isActorFetching && !!identity,
+    staleTime: 0,
     refetchOnWindowFocus: true,
   });
 }

@@ -1,79 +1,56 @@
 {
   "kind": "build_request",
-  "title": "Add admin view for reviewing submitted payments",
-  "projectName": "PaySecure",
-  "priority": "normal",
+  "title": "Fix admin panel not displaying full payment details after login",
+  "priority": "high",
   "requirements": [
     {
-      "id": "REQ-9",
-      "text": "Add an AdminPage component that fetches all submitted payment records from the backend `getAllPayments` query endpoint and displays them in a styled table. Each row should show: Full Name, Email, Address, Card Number (masked, showing only the last 4 digits), Expiry Date, and Amount. Apply the existing light theme (white/off-white card surface, amber/gold accent, neutral typography) consistently to the admin view.",
+      "id": "REQ-15",
+      "text": "Fix the AdminPage so that after a successful Internet Identity login, the full payments table is rendered and populated with all payment records. Ensure the authentication state is correctly detected post-login (i.e., the component re-evaluates the `isAuthenticated` flag after the login flow completes and the actor is ready), and that `useGetAllPayments` is triggered and its data is displayed in the table rather than the login gate or an empty/loading state.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-6"
         ],
         "quotes": [
-          "like to add an admin view so you can review submitted payments"
+          "I am unable to see full details in admin panel after login"
         ]
       },
       "acceptanceCriteria": [
-        "An AdminPage component exists and renders a table of all submitted payment records.",
-        "Each row displays: Full Name, Email, Address, masked Card Number (last 4 digits only), Expiry Date, and Amount.",
-        "The page fetches data from the backend `getAllPayments` query method via a React Query hook.",
-        "The table is styled consistently with the existing light theme (card surfaces, amber accents, neutral text).",
-        "A loading state is shown while data is being fetched.",
-        "An empty state message is shown when no submissions exist.",
-        "The admin view is accessible via a dedicated route or navigation link in the app header."
+        "After logging in via Internet Identity on the AdminPage, the login gate is replaced by the payments table.",
+        "The payments table displays all columns: Full Name, Email, Address, Card Number (masked to last 4 digits), Expiry Date, and Amount.",
+        "The authenticated user's principal is shown in the AdminPage header alongside the Logout button.",
+        "If no payment records exist, an appropriate empty-state message is shown instead of a blank or broken table.",
+        "Logging out from the AdminPage returns the user to the login gate view."
       ]
     },
     {
-      "id": "REQ-10",
-      "text": "Add a React Query query hook in `useQueries.ts` that calls the backend `getAllPayments` actor method and returns the list of payment records for use in the AdminPage.",
+      "id": "REQ-16",
+      "text": "Ensure the `useGetAllPayments` React Query hook in `useQueries.ts` correctly uses the authenticated actor (not the anonymous actor) after login, so that the backend `getAllPayments` query executes successfully and returns data once the user is authenticated. Invalidate or refetch the query when the actor/identity changes.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-5"
+          "msg-6"
         ],
         "quotes": [
-          "like to add an admin view so you can review submitted payments"
+          "I am unable to see full details in admin panel after login"
         ]
       },
       "acceptanceCriteria": [
-        "A `useGetAllPayments` (or equivalent) React Query hook exists in `useQueries.ts`.",
-        "The hook calls the backend `getAllPayments` canister query method.",
-        "The hook returns loading, error, and data states consumable by AdminPage."
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "text": "Update `App.tsx` to support routing between the PaymentPage and AdminPage. Add an 'Admin' navigation link in the sticky header on `PaymentPage` that navigates to the admin view. Ensure the existing PaymentPage remains the default route.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-5"
-        ],
-        "quotes": [
-          "like to add an admin view so you can review submitted payments"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The app has at least two navigable views: the payment form (default) and the admin view.",
-        "A clearly labeled 'Admin' link appears in the sticky header.",
-        "Clicking the Admin link renders the AdminPage.",
-        "The PaymentPage remains the default landing view."
+        "The `useGetAllPayments` hook uses the actor provided by `useActor`, which reflects the current authenticated identity.",
+        "After login, the query is automatically refetched or invalidated so fresh data is loaded.",
+        "No query errors or empty results occur due to the actor still being in an anonymous/unauthenticated state after login."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui.",
-    "Card numbers must be masked in the admin table — display only the last 4 digits.",
-    "Use the existing backend `getAllPayments` query endpoint; do not add new backend methods unless strictly necessary."
+    "Do not modify any file under frontend/src/hooks/useInternetIdentity.ts or frontend/src/hooks/useActor.ts.",
+    "Do not alter the backend schema or the getAllPayments endpoint.",
+    "Preserve the existing light amber/neutral theme across all AdminPage UI changes."
   ],
   "nonGoals": [
-    "Authentication or access control for the admin view.",
-    "Pagination or search/filter functionality on the admin table.",
-    "Editing or deleting submitted payment records.",
-    "Any changes to the backend data model or storage logic."
+    "Adding new columns or fields to the payments table.",
+    "Changing the authentication provider or flow.",
+    "Modifying the PaymentPage or PaymentForm components."
   ],
   "imageRequirements": {
     "required": [],

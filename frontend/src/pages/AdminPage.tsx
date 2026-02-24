@@ -1,4 +1,7 @@
 import { useGetAllPayments } from '../hooks/useQueries';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { useActor } from '../hooks/useActor';
+import AdminLoginGate from '../components/AdminLoginGate';
 import {
   Table,
   TableBody,
@@ -9,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ShieldCheck, ArrowLeft, RefreshCw, CreditCard } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, RefreshCw, CreditCard, LogOut, User } from 'lucide-react';
 
 interface AdminPageProps {
   onBack: () => void;
@@ -28,10 +31,55 @@ function formatAmount(amount: bigint): string {
   }).format(Number(amount) / 100);
 }
 
+function truncatePrincipal(principal: string): string {
+  if (principal.length <= 12) return principal;
+  return `${principal.slice(0, 8)}…`;
+}
+
 export default function AdminPage({ onBack }: AdminPageProps) {
+  const { identity, clear, isInitializing } = useInternetIdentity();
+  const { isFetching: isActorFetching } = useActor();
   const { data: payments, isLoading, isError, refetch, isFetching } = useGetAllPayments();
+
   const year = new Date().getFullYear();
   const appId = encodeURIComponent(window.location.hostname || 'payment-submission-form');
+
+  // Show spinner while identity is being restored from storage
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+        <div className="flex flex-col items-center gap-3">
+          <svg className="animate-spin w-8 h-8 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+          </svg>
+          <span className="text-sm text-neutral-500">Loading…</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login gate if not authenticated
+  if (!identity) {
+    return <AdminLoginGate />;
+  }
+
+  // Show spinner while the authenticated actor is being initialized after login
+  if (isActorFetching) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+        <div className="flex flex-col items-center gap-3">
+          <svg className="animate-spin w-8 h-8 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+          </svg>
+          <span className="text-sm text-neutral-500">Connecting to admin panel…</span>
+        </div>
+      </div>
+    );
+  }
+
+  const principal = identity.getPrincipal().toString();
 
   return (
     <div className="min-h-screen flex flex-col bg-neutral-50">
@@ -40,26 +88,52 @@ export default function AdminPage({ onBack }: AdminPageProps) {
 
       {/* Header */}
       <header className="border-b border-neutral-200 bg-white/90 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+          {/* Left: logo + badge */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center shadow-sm flex-shrink-0">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white">
                 <rect width="20" height="14" x="2" y="5" rx="2"/>
                 <line x1="2" x2="22" y1="10" y2="10"/>
               </svg>
             </div>
             <span className="font-bold text-neutral-900 text-lg tracking-tight">PaySecure</span>
-            <Badge variant="secondary" className="ml-1 text-xs bg-amber-100 text-amber-700 border-amber-200">
+            <Badge variant="secondary" className="ml-1 text-xs bg-amber-100 text-amber-700 border-amber-200 flex-shrink-0">
               Admin
             </Badge>
           </div>
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-amber-600 transition-colors font-medium"
-          >
-            <ArrowLeft size={15} />
-            Back to Payment
-          </button>
+
+          {/* Right: principal + actions */}
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            {/* Principal display */}
+            <div className="hidden sm:flex items-center gap-1.5 bg-neutral-100 border border-neutral-200 rounded-lg px-3 py-1.5 min-w-0">
+              <User size={13} className="text-neutral-400 flex-shrink-0" />
+              <span
+                className="text-xs font-mono text-neutral-600 truncate max-w-[120px]"
+                title={principal}
+              >
+                {truncatePrincipal(principal)}
+              </span>
+            </div>
+
+            {/* Back button */}
+            <button
+              onClick={onBack}
+              className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-amber-600 transition-colors font-medium flex-shrink-0"
+            >
+              <ArrowLeft size={15} />
+              <span className="hidden sm:inline">Back</span>
+            </button>
+
+            {/* Logout button */}
+            <button
+              onClick={() => clear()}
+              className="btn-gold flex items-center gap-1.5 text-xs py-1.5 px-3 rounded-lg flex-shrink-0"
+            >
+              <LogOut size={13} />
+              <span>Logout</span>
+            </button>
+          </div>
         </div>
       </header>
 

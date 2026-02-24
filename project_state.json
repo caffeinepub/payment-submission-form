@@ -1,10 +1,12 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
+  "projectStateVersion": 13,
   "summary": "A payment submission form web app where customers can fill in their details including Name, Address, Email, 16-digit Card Number, Expiry Date, CVV, and Amount.",
   "architectural_notes": [],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Admin panel does not display full payment details after login"
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-build-a-payment-submission-form-page-with-input-fields-for-full-name-address-email-16-digit-card-number-auto-formatted-with-spaces-every-4-digits-expiry-date-mm-yy-cvv-and-amount-validate-all-fields-before-submission-show-real-time-inline-validation-errors-on-successful-submission-show-a-confirmation-message",
@@ -61,6 +63,46 @@
         "REQ-11"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-protect-the-adminpage-route-so-that-only-authenticated-users-logged-in-via-internet-identity-can-access-it-unauthenticated-visitors-who-navigate-to-the-admin-view-must-be-shown-a-login-prompt-instead-of-the-admin-table",
+      "title": "Protect the AdminPage route so that only authenticated users (logged in via Internet Identity) can access it. Unauthenticated visitors who navigate to the admin view must be shown a login prompt instead of the admin table.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-styled-login-gate-component-rendered-within-the-adminpage-area-when-the-user-is-not-authenticated-the-component-should-display-a-lock-icon-or-secure-badge-a-short-message-explaining-that-admin-access-is-restricted-and-a-login-with-internet-identity-button-styled-consistently-with-the-existing-light-amber-neutral-theme",
+      "title": "Add a styled login gate component rendered within the AdminPage area when the user is not authenticated. The component should display a lock icon or secure badge, a short message explaining that admin access is restricted, and a 'Login with Internet Identity' button styled consistently with the existing light amber/neutral theme.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-the-currently-authenticated-user-s-internet-identity-principal-or-a-truncated-version-of-it-in-the-adminpage-header-alongside-the-logout-button-so-admins-can-confirm-their-identity",
+      "title": "Display the currently authenticated user's Internet Identity principal (or a truncated version of it) in the AdminPage header alongside the Logout button, so admins can confirm their identity.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-adminpage-so-that-after-a-successful-internet-identity-login-the-full-payments-table-is-rendered-and-populated-with-all-payment-records-ensure-the-authentication-state-is-correctly-detected-post-login-i-e-the-component-re-evaluates-the-isauthenticated-flag-after-the-login-flow-completes-and-the-actor-is-ready-and-that-usegetallpayments-is-triggered-and-its-data-is-displayed-in-the-table-rather-than-the-login-gate-or-an-empty-loading-state",
+      "title": "Fix the AdminPage so that after a successful Internet Identity login, the full payments table is rendered and populated with all payment records. Ensure the authentication state is correctly detected post-login (i.e., the component re-evaluates the `isAuthenticated` flag after the login flow completes and the actor is ready), and that `useGetAllPayments` is triggered and its data is displayed in the table rather than the login gate or an empty/loading state.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-usegetallpayments-react-query-hook-in-usequeries-ts-correctly-uses-the-authenticated-actor-not-the-anonymous-actor-after-login-so-that-the-backend-getallpayments-query-executes-successfully-and-returns-data-once-the-user-is-authenticated-invalidate-or-refetch-the-query-when-the-actor-identity-changes",
+      "title": "Ensure the `useGetAllPayments` React Query hook in `useQueries.ts` correctly uses the authenticated actor (not the anonymous actor) after login, so that the backend `getAllPayments` query executes successfully and returns data once the user is authenticated. Invalidate or refetch the query when the actor/identity changes.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -111,6 +153,12 @@
     {
       "id": "AR-7",
       "summary": "Add an admin view to review all submitted payments, displaying stored payment submissions in a table or list format.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Add authentication to protect the admin panel so only authorized users can access it.",
       "reqIds": [],
       "status": "pending"
     }

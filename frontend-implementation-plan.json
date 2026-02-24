@@ -1,63 +1,39 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add admin view for reviewing submitted payments",
+  "title": "Fix admin panel payment details display after login",
   "requirements": [
     {
-      "id": "REQ-9",
-      "summary": "Create AdminPage component that fetches and displays all submitted payment records in a styled table with masked card numbers",
+      "id": "REQ-15",
+      "summary": "Fix AdminPage to render full payments table after Internet Identity login by ensuring authentication state is correctly detected post-login and useGetAllPayments is triggered",
       "acceptanceCriteria": [
-        "An AdminPage component exists and renders a table of all submitted payment records.",
-        "Each row displays: Full Name, Email, Address, masked Card Number (last 4 digits only), Expiry Date, and Amount.",
-        "The page fetches data from the backend `getAllPayments` query method via a React Query hook.",
-        "The table is styled consistently with the existing light theme (card surfaces, amber accents, neutral text).",
-        "A loading state is shown while data is being fetched.",
-        "An empty state message is shown when no submissions exist.",
-        "The admin view is accessible via a dedicated route or navigation link in the app header."
+        "After logging in via Internet Identity on the AdminPage, the login gate is replaced by the payments table.",
+        "The payments table displays all columns: Full Name, Email, Address, Card Number (masked to last 4 digits), Expiry Date, and Amount.",
+        "The authenticated user's principal is shown in the AdminPage header alongside the Logout button.",
+        "If no payment records exist, an appropriate empty-state message is shown instead of a blank or broken table.",
+        "Logging out from the AdminPage returns the user to the login gate view."
       ],
       "file_operations": [
         {
           "path": "frontend/src/pages/AdminPage.tsx",
-          "operation": "create",
-          "description": "Create AdminPage component that uses the useGetAllPayments hook to fetch payment records and displays them in a table. Include a sticky header with app branding and a 'Back to Payment' navigation link. Display Full Name, Email, Address, masked Card Number (last 4 digits only), Expiry Date, and Amount in table columns. Apply the existing light theme styling with card surfaces (white/off-white), amber/gold accents, and neutral typography. Show a loading spinner while fetching data. Show an empty state message when no payments exist. Use the same layout structure and styling patterns as PaymentPage for consistency."
+          "operation": "modify",
+          "description": "Refactor AdminPage to properly react to authentication state changes after login. Add useEffect to monitor isAuthenticated and identity changes, ensuring the component re-renders when the user completes the login flow. Ensure the payments table is conditionally rendered based on isAuthenticated state, replacing the login gate. Add proper loading states during the authentication transition. Verify that the principal display and logout functionality work correctly in the authenticated state. Ensure an appropriate empty-state message is shown when no payment records exist."
         }
       ]
     },
     {
-      "id": "REQ-10",
-      "summary": "Add React Query hook for fetching all payment records from the backend",
+      "id": "REQ-16",
+      "summary": "Ensure useGetAllPayments hook uses the authenticated actor and refetches after login by correctly integrating with useActor and invalidating queries on identity changes",
       "acceptanceCriteria": [
-        "A `useGetAllPayments` (or equivalent) React Query hook exists in `useQueries.ts`.",
-        "The hook calls the backend `getAllPayments` canister query method.",
-        "The hook returns loading, error, and data states consumable by AdminPage."
+        "The `useGetAllPayments` hook uses the actor provided by `useActor`, which reflects the current authenticated identity.",
+        "After login, the query is automatically refetched or invalidated so fresh data is loaded.",
+        "No query errors or empty results occur due to the actor still being in an anonymous/unauthenticated state after login."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Add a useGetAllPayments React Query hook that calls the backend getAllPayments actor method. The hook should return an array of Payment objects with loading, error, and data states. Use the useActor hook to get the backend actor instance. Configure the query with appropriate stale time and refetch settings for admin data review."
-        }
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "summary": "Add routing support and Admin navigation link to enable navigation between PaymentPage and AdminPage",
-      "acceptanceCriteria": [
-        "The app has at least two navigable views: the payment form (default) and the admin view.",
-        "A clearly labeled 'Admin' link appears in the sticky header.",
-        "Clicking the Admin link renders the AdminPage.",
-        "The PaymentPage remains the default landing view."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Replace the single PaymentPage render with a simple client-side routing mechanism (using React state or hash-based routing) that renders PaymentPage by default and AdminPage when the admin route is active. Ensure PaymentPage is the default landing view."
-        },
-        {
-          "path": "frontend/src/pages/PaymentPage.tsx",
-          "operation": "modify",
-          "description": "Add an 'Admin' navigation link in the sticky header that triggers navigation to the admin view. Style the link consistently with the existing light theme (amber/gold accent on hover). Position the link prominently in the header alongside the existing branding."
+          "description": "Update useGetAllPayments hook to properly depend on the authenticated actor from useActor. Add a query key that includes the identity/principal to ensure the query is invalidated when authentication state changes. Configure the query to be enabled only when the actor is authenticated (not anonymous). Ensure the query automatically refetches when the actor transitions from anonymous to authenticated state. Add proper error handling for cases where the actor is not yet ready or authentication has not completed."
         }
       ]
     }

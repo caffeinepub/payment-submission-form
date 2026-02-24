@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-an-adminpage-component-that-fetches-all-submitted-payment-records-from-the-backend-getallpayments-query-endpoint-and-displays-them-in-a-styled-table-each-row-should-show-full-name-email-address-card-number-masked-showing-only-the-last-4-digits-expiry-date-and-amount-apply-the-existing-light-theme-white-off-white-card-surface-amber-gold-accent-neutral-typography-consistently-to-the-admin-view",
-      "featureTitle": "Add an AdminPage component that fetches all submitted payment records from the backend `getAllPayments` query endpoint and displays them in a styled table. Each row should show: Full Name, Email, Address, Card Number (masked, showing only the last 4 digits), Expiry Date, and Amount. Apply the existing light theme (white/off-white card surface, amber/gold accent, neutral typography) consistently to the admin view.",
+      "featureId": "feature-fix-the-adminpage-so-that-after-a-successful-internet-identity-login-the-full-payments-table-is-rendered-and-populated-with-all-payment-records-ensure-the-authentication-state-is-correctly-detected-post-login-i-e-the-component-re-evaluates-the-isauthenticated-flag-after-the-login-flow-completes-and-the-actor-is-ready-and-that-usegetallpayments-is-triggered-and-its-data-is-displayed-in-the-table-rather-than-the-login-gate-or-an-empty-loading-state",
+      "featureTitle": "Fix the AdminPage so that after a successful Internet Identity login, the full payments table is rendered and populated with all payment records. Ensure the authentication state is correctly detected post-login (i.e., the component re-evaluates the `isAuthenticated` flag after the login flow completes and the actor is ready), and that `useGetAllPayments` is triggered and its data is displayed in the table rather than the login gate or an empty/loading state.",
       "files": [
         "frontend/src/pages/AdminPage.tsx"
       ],
@@ -15,13 +15,13 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-9"
+        "REQ-15"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-react-query-query-hook-in-usequeries-ts-that-calls-the-backend-getallpayments-actor-method-and-returns-the-list-of-payment-records-for-use-in-the-adminpage",
-      "featureTitle": "Add a React Query query hook in `useQueries.ts` that calls the backend `getAllPayments` actor method and returns the list of payment records for use in the AdminPage.",
+      "featureId": "feature-ensure-the-usegetallpayments-react-query-hook-in-usequeries-ts-correctly-uses-the-authenticated-actor-not-the-anonymous-actor-after-login-so-that-the-backend-getallpayments-query-executes-successfully-and-returns-data-once-the-user-is-authenticated-invalidate-or-refetch-the-query-when-the-actor-identity-changes",
+      "featureTitle": "Ensure the `useGetAllPayments` React Query hook in `useQueries.ts` correctly uses the authenticated actor (not the anonymous actor) after login, so that the backend `getAllPayments` query executes successfully and returns data once the user is authenticated. Invalidate or refetch the query when the actor/identity changes.",
       "files": [
         "frontend/src/hooks/useQueries.ts"
       ],
@@ -33,26 +33,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-10"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-app-tsx-to-support-routing-between-the-paymentpage-and-adminpage-add-an-admin-navigation-link-in-the-sticky-header-on-paymentpage-that-navigates-to-the-admin-view-ensure-the-existing-paymentpage-remains-the-default-route",
-      "featureTitle": "Update `App.tsx` to support routing between the PaymentPage and AdminPage. Add an 'Admin' navigation link in the sticky header on `PaymentPage` that navigates to the admin view. Ensure the existing PaymentPage remains the default route.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/pages/PaymentPage.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-11"
+        "REQ-16"
       ],
       "confidence": "high"
     }

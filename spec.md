@@ -1,14 +1,15 @@
 # Specification
 
 ## Summary
-**Goal:** Add an admin view to PaySecure that allows reviewing all submitted payment records in a styled table.
+**Goal:** Fix the AdminPage so that after a successful Internet Identity login, the full payments table is correctly displayed with all payment records.
 
 **Planned changes:**
-- Add an `AdminPage` component that displays all submitted payment records in a table with columns: Full Name, Email, Address, masked Card Number (last 4 digits only), Expiry Date, and Amount
-- Style the admin table consistently with the existing light theme (white/off-white card surface, amber/gold accents, neutral typography)
-- Show a loading state while data is fetching and an empty state message when no records exist
-- Add a `useGetAllPayments` React Query hook in `useQueries.ts` that calls the backend `getAllPayments` canister method
-- Update `App.tsx` to add routing between `PaymentPage` (default) and `AdminPage`
-- Add an "Admin" navigation link in the sticky header on `PaymentPage`
+- Fix the AdminPage to correctly re-evaluate the `isAuthenticated` flag after the login flow completes, replacing the login gate with the payments table.
+- Ensure the payments table renders all columns: Full Name, Email, Address, Card Number (masked to last 4 digits), Expiry Date, and Amount.
+- Display the authenticated user's principal in the AdminPage header alongside the Logout button.
+- Show an empty-state message when no payment records exist.
+- Restore the login gate view upon logout.
+- Update the `useGetAllPayments` hook to use the authenticated actor from `useActor` instead of an anonymous actor after login.
+- Automatically refetch or invalidate the payments query when the actor/identity changes post-login.
 
-**User-visible outcome:** Users can navigate to an Admin view via the header link and see a table of all submitted payment records with card numbers masked to show only the last 4 digits.
+**User-visible outcome:** After logging in via Internet Identity on the AdminPage, the user sees the full payments table populated with all payment records instead of a blank, loading, or login-gate state.
