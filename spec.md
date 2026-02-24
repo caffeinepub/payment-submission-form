@@ -1,14 +1,14 @@
 # Specification
 
 ## Summary
-**Goal:** Replace the dark navy and gold color palette of the SecurePay UI with a clean light theme throughout the entire frontend.
+**Goal:** Add an admin view to PaySecure that allows reviewing all submitted payment records in a styled table.
 
 **Planned changes:**
-- Update all custom CSS properties and Tailwind theme tokens to use white/off-white backgrounds and light surface colors
-- Update component classes (`.payment-card`, `.payment-input`, `.btn-gold`, etc.) to reflect the light palette
-- Apply light theme to the header, form card, input fields, validation errors, success confirmation screen, trust badges, and footer
-- Use a muted gold or warm amber accent color for buttons, focus rings, and highlights on the light base
-- Ensure all text has sufficient contrast on light backgrounds
-- Remove all remnants of the dark navy palette
+- Add an `AdminPage` component that displays all submitted payment records in a table with columns: Full Name, Email, Address, masked Card Number (last 4 digits only), Expiry Date, and Amount
+- Style the admin table consistently with the existing light theme (white/off-white card surface, amber/gold accents, neutral typography)
+- Show a loading state while data is fetching and an empty state message when no records exist
+- Add a `useGetAllPayments` React Query hook in `useQueries.ts` that calls the backend `getAllPayments` canister method
+- Update `App.tsx` to add routing between `PaymentPage` (default) and `AdminPage`
+- Add an "Admin" navigation link in the sticky header on `PaymentPage`
 
-**User-visible outcome:** The entire SecurePay UI displays a clean light theme with white/off-white backgrounds, light card surfaces, and warm amber/gold accents, replacing the previous dark navy style.
+**User-visible outcome:** Users can navigate to an Admin view via the header link and see a table of all submitted payment records with card numbers masked to show only the last 4 digits.

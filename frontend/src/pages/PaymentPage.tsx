@@ -1,6 +1,11 @@
 import PaymentForm from '../components/PaymentForm';
+import { LayoutDashboard } from 'lucide-react';
 
-export default function PaymentPage() {
+interface PaymentPageProps {
+  onNavigateAdmin?: () => void;
+}
+
+export default function PaymentPage({ onNavigateAdmin }: PaymentPageProps) {
   const year = new Date().getFullYear();
   const appId = encodeURIComponent(window.location.hostname || 'payment-submission-form');
 
@@ -21,11 +26,22 @@ export default function PaymentPage() {
             </div>
             <span className="font-bold text-neutral-900 text-lg tracking-tight">PaySecure</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-neutral-500">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-            <span>Secure &amp; Encrypted</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5 text-xs text-neutral-500">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              <span>Secure &amp; Encrypted</span>
+            </div>
+            {onNavigateAdmin && (
+              <button
+                onClick={onNavigateAdmin}
+                className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-amber-600 transition-colors font-medium border border-neutral-200 hover:border-amber-300 rounded-lg px-3 py-1.5"
+              >
+                <LayoutDashboard size={14} />
+                Admin
+              </button>
+            )}
           </div>
         </div>
       </header>

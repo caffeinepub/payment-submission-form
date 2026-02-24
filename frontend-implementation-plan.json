@@ -1,42 +1,63 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Refine UI with light theme",
+  "title": "Add admin view for reviewing submitted payments",
   "requirements": [
     {
-      "id": "REQ-8",
-      "summary": "Replace dark navy and gold palette with a clean light theme across the entire payment UI",
+      "id": "REQ-9",
+      "summary": "Create AdminPage component that fetches and displays all submitted payment records in a styled table with masked card numbers",
       "acceptanceCriteria": [
-        "The page background is white or a light neutral tone — dark navy background is removed.",
-        "The form card uses a light surface color with subtle shadow instead of a dark card style.",
-        "Input fields have a light background with dark text and clearly visible borders.",
-        "The primary action button uses the accent color (e.g., warm gold/amber) on a light base, maintaining readability.",
-        "Inline validation error messages are visible and appropriately styled on light backgrounds.",
-        "The success confirmation screen follows the light theme consistently.",
-        "The header and footer are updated to use light theme colors.",
-        "All text elements have sufficient contrast ratio on their light backgrounds.",
-        "No remnants of the dark navy palette remain in the UI."
+        "An AdminPage component exists and renders a table of all submitted payment records.",
+        "Each row displays: Full Name, Email, Address, masked Card Number (last 4 digits only), Expiry Date, and Amount.",
+        "The page fetches data from the backend `getAllPayments` query method via a React Query hook.",
+        "The table is styled consistently with the existing light theme (card surfaces, amber accents, neutral text).",
+        "A loading state is shown while data is being fetched.",
+        "An empty state message is shown when no submissions exist.",
+        "The admin view is accessible via a dedicated route or navigation link in the app header."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Replace OKLCH-based CSS custom properties with light theme tokens. Update background colors to white/off-white, define light card surfaces, replace dark navy with light neutrals, update gold accent to a warm amber or muted gold suitable for light backgrounds, and ensure all text color tokens provide sufficient contrast. Update component classes `.payment-card`, `.payment-input`, `.btn-gold`, error styles, and any other design system tokens to reflect the light palette. Remove all dark navy color references."
-        },
+          "path": "frontend/src/pages/AdminPage.tsx",
+          "operation": "create",
+          "description": "Create AdminPage component that uses the useGetAllPayments hook to fetch payment records and displays them in a table. Include a sticky header with app branding and a 'Back to Payment' navigation link. Display Full Name, Email, Address, masked Card Number (last 4 digits only), Expiry Date, and Amount in table columns. Apply the existing light theme styling with card surfaces (white/off-white), amber/gold accents, and neutral typography. Show a loading spinner while fetching data. Show an empty state message when no payments exist. Use the same layout structure and styling patterns as PaymentPage for consistency."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Add React Query hook for fetching all payment records from the backend",
+      "acceptanceCriteria": [
+        "A `useGetAllPayments` (or equivalent) React Query hook exists in `useQueries.ts`.",
+        "The hook calls the backend `getAllPayments` canister query method.",
+        "The hook returns loading, error, and data states consumable by AdminPage."
+      ],
+      "file_operations": [
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Update Tailwind theme extensions to replace custom navy/gold OKLCH color palettes with light theme equivalents. Define light background colors, light card surfaces, muted warm accent colors for interactive elements, and appropriate text color scales that maintain contrast on light backgrounds. Ensure border, shadow, and ring utilities align with the light design system."
+          "description": "Add a useGetAllPayments React Query hook that calls the backend getAllPayments actor method. The hook should return an array of Payment objects with loading, error, and data states. Use the useActor hook to get the backend actor instance. Configure the query with appropriate stale time and refetch settings for admin data review."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Add routing support and Admin navigation link to enable navigation between PaymentPage and AdminPage",
+      "acceptanceCriteria": [
+        "The app has at least two navigable views: the payment form (default) and the admin view.",
+        "A clearly labeled 'Admin' link appears in the sticky header.",
+        "Clicking the Admin link renders the AdminPage.",
+        "The PaymentPage remains the default landing view."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Replace the single PaymentPage render with a simple client-side routing mechanism (using React state or hash-based routing) that renders PaymentPage by default and AdminPage when the admin route is active. Ensure PaymentPage is the default landing view."
         },
         {
           "path": "frontend/src/pages/PaymentPage.tsx",
           "operation": "modify",
-          "description": "Update the full-page layout to use light theme colors. Replace dark background with white or light neutral, update header and footer text colors for contrast on light backgrounds, adjust trust badge styling to work on light surfaces, and ensure the blurred background image (frontend/public/assets/generated/payment-bg.dim_1920x1080.png) is either removed or styled to support the light theme aesthetic without conflicting with readability."
-        },
-        {
-          "path": "frontend/src/components/PaymentForm.tsx",
-          "operation": "modify",
-          "description": "Update the payment form component to use light theme styling. Ensure the form card uses a light surface color with subtle shadow, input fields have light backgrounds with dark text and visible borders, validation error messages are clearly visible on light backgrounds, the loading state uses light-appropriate colors, and the success confirmation screen follows the light theme consistently. Update all button classes (e.g., `.btn-gold`) to use the new accent color suitable for light backgrounds."
+          "description": "Add an 'Admin' navigation link in the sticky header that triggers navigation to the admin view. Style the link consistently with the existing light theme (amber/gold accent on hover). Position the link prominently in the header alongside the existing branding."
         }
       ]
     }

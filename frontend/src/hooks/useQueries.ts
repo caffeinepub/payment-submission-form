@@ -1,5 +1,6 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
+import type { Payment } from '../backend';
 
 export function useSubmitPayment() {
   const { actor } = useActor();
@@ -29,5 +30,20 @@ export function useSubmitPayment() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['payments'] });
     },
+  });
+}
+
+export function useGetAllPayments() {
+  const { actor, isFetching } = useActor();
+
+  return useQuery<Payment[]>({
+    queryKey: ['payments'],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.getAllPayments();
+    },
+    enabled: !!actor && !isFetching,
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
   });
 }

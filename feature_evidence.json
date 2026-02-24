@@ -2,13 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-replace-the-current-dark-navy-and-gold-color-palette-with-a-clean-light-theme-use-a-white-or-off-white-background-light-card-surfaces-and-a-refined-accent-color-e-g-a-muted-gold-or-warm-amber-on-light-for-interactive-elements-like-buttons-focus-rings-and-highlights-ensure-all-text-has-sufficient-contrast-on-light-backgrounds-update-all-custom-css-properties-tailwind-theme-tokens-and-component-classes-payment-card-payment-input-btn-gold-etc-to-reflect-the-new-light-palette-apply-the-light-theme-consistently-across-the-entire-ui-header-form-card-input-fields-validation-errors-success-confirmation-screen-trust-badges-and-footer",
-      "featureTitle": "Replace the current dark navy and gold color palette with a clean light theme. Use a white or off-white background, light card surfaces, and a refined accent color (e.g., a muted gold or warm amber on light) for interactive elements like buttons, focus rings, and highlights. Ensure all text has sufficient contrast on light backgrounds. Update all custom CSS properties, Tailwind theme tokens, and component classes (`.payment-card`, `.payment-input`, `.btn-gold`, etc.) to reflect the new light palette. Apply the light theme consistently across the entire UI: header, form card, input fields, validation errors, success confirmation screen, trust badges, and footer.",
+      "featureId": "feature-add-an-adminpage-component-that-fetches-all-submitted-payment-records-from-the-backend-getallpayments-query-endpoint-and-displays-them-in-a-styled-table-each-row-should-show-full-name-email-address-card-number-masked-showing-only-the-last-4-digits-expiry-date-and-amount-apply-the-existing-light-theme-white-off-white-card-surface-amber-gold-accent-neutral-typography-consistently-to-the-admin-view",
+      "featureTitle": "Add an AdminPage component that fetches all submitted payment records from the backend `getAllPayments` query endpoint and displays them in a styled table. Each row should show: Full Name, Email, Address, Card Number (masked, showing only the last 4 digits), Expiry Date, and Amount. Apply the existing light theme (white/off-white card surface, amber/gold accent, neutral typography) consistently to the admin view.",
       "files": [
-        "frontend/src/components/PaymentForm.tsx",
-        "frontend/src/index.css",
-        "frontend/src/pages/PaymentPage.tsx",
-        "frontend/tailwind.config.js"
+        "frontend/src/pages/AdminPage.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -18,7 +15,44 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-8"
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-react-query-query-hook-in-usequeries-ts-that-calls-the-backend-getallpayments-actor-method-and-returns-the-list-of-payment-records-for-use-in-the-adminpage",
+      "featureTitle": "Add a React Query query hook in `useQueries.ts` that calls the backend `getAllPayments` actor method and returns the list of payment records for use in the AdminPage.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-app-tsx-to-support-routing-between-the-paymentpage-and-adminpage-add-an-admin-navigation-link-in-the-sticky-header-on-paymentpage-that-navigates-to-the-admin-view-ensure-the-existing-paymentpage-remains-the-default-route",
+      "featureTitle": "Update `App.tsx` to support routing between the PaymentPage and AdminPage. Add an 'Admin' navigation link in the sticky header on `PaymentPage` that navigates to the admin view. Ensure the existing PaymentPage remains the default route.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/pages/PaymentPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-11"
       ],
       "confidence": "high"
     }
