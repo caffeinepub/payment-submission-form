@@ -1,15 +1,68 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T19:34:15.838Z",
-  "summary": "The diff implements the majority of REQ-31's requirements: the useSubmitPayment mutation in useQueries.ts is gated with an actor-readiness guard, exposes isActorReady, and retries up to 2 times with exponential back-off for transient errors. PaymentForm.tsx disables the submit button (with a spinner and 'Connecting...' label) and shows a banner while the actor is initializing. The success/confirmation screen is retained. All acceptance criteria appear to be met.",
-  "missing_requirements": [],
-  "hallucinated_features": [],
-  "confidence": 0.92,
+  "generatedAt": "2026-02-24T20:23:38.811Z",
+  "summary": "The diff addresses all four requirements with varying degrees of completeness. REQ-36 backend changes are present but the stable storage fix is incomplete — the code still uses an in-memory Map without stable variable declarations or pre/postupgrade hooks. REQ-37 is partially implemented: actorReady is derived in useQueries.ts but useActor.ts does not expose an actorReady boolean, and the queryClient.invalidateQueries after login is not evidenced. REQ-38 and REQ-39 appear largely implemented in AdminPage.tsx and PaymentForm.tsx respectively.",
+  "missing_requirements": [
+    {
+      "id": "REQ-36",
+      "requirement": "submitPayment appends to a stable variable; getAllPayments reads from that same stable variable; no re-initialisation on upgrade; preupgrade/postupgrade hooks if needed; no transient in-memory buffer that loses data on upgrade.",
+      "reason": "The backend/main.mo diff shows 'var payments = Map.empty<Nat, Payment>()' which is a plain mutable heap variable, not a stable var. There are no preupgrade/postupgrade hooks visible in the truncated diff. This means records will be lost on canister upgrade, directly violating the ACs that getAllPayments returns all previously submitted records after a canister upgrade and that no in-memory buffer exists that would cause records to be lost on upgrade.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-37",
+      "requirement": "useActor.ts must expose an actorReady boolean that is false during AuthClient initialisation and becomes true only after the identity is applied to the actor instance.",
+      "reason": "The useQueries.ts file derives actorReady locally as !!actor && !isActorFetching rather than consuming an actorReady property from useActor, suggesting useActor does not expose the required boolean. The full useActor.ts diff is not shown so this cannot be confirmed as implemented.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/hooks/useActor.ts"
+      ]
+    },
+    {
+      "id": "REQ-37",
+      "requirement": "After a successful Internet Identity login, call queryClient.invalidateQueries(['getAllPayments']) so the table refetches automatically without a manual page refresh.",
+      "reason": "No evidence in any of the diffed files of a queryClient.invalidateQueries call triggered on Internet Identity login completion. The login flow itself is not modified in any visible diff.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/hooks/useActor.ts"
+      ]
+    },
+    {
+      "id": "REQ-37",
+      "requirement": "useGetAllPayments must use queryKey ['getAllPayments'] for invalidation to work after login.",
+      "reason": "useGetAllPayments uses queryKey ['payments', 'all'] instead of ['getAllPayments'] as specified. This means the queryClient.invalidateQueries(['getAllPayments']) call required by REQ-37 would not match this query, breaking the automatic refetch after login.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Stats summary cards (Total Payments, Total Amount) with Skeleton loading placeholders added to AdminPage",
+      "reason": "REQ-38 only requests a spinner during loading, error display after retries, and correct table row rendering. The stats cards with aggregate totals and Skeleton components go beyond what was specified.",
+      "evidence": [
+        "frontend/src/pages/AdminPage.tsx"
+      ]
+    },
+    {
+      "description": "Connecting to payment service informational amber banner shown in PaymentForm when actor is not ready, in addition to disabling the submit button",
+      "reason": "REQ-39 specifies the submit button should be disabled with a spinner while actorReady is false. An additional informational amber banner is rendered above the form — this UI element was not requested.",
+      "evidence": [
+        "frontend/src/components/PaymentForm.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.72,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
     "frontend/src/components/PaymentForm.tsx",
     "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/AdminPage.tsx",
     "project_state.json"
   ]
 }

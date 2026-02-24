@@ -1,12 +1,13 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 23,
+  "projectStateVersion": 29,
   "summary": "A payment submission form web app where customers can fill in their details including Name, Address, Email, 16-digit Card Number, Expiry Date, CVV, and Amount. The app features a clean light theme (white/off-white background, amber/gold accent).",
   "architectural_notes": [],
   "known_issues": [
     "Admin panel fails to load payments after login — shows 'Failed to load payments, please try refreshing' error",
     "Payment submission fails with 'Payment submission failed. Please try again.' error",
-    "Payment form shows 'Payment service not ready. Please wait a moment and try again.' error on submission"
+    "Payment form shows 'Payment service not ready. Please wait a moment and try again.' error on submission",
+    "Admin panel does not display submitted payment records after submission"
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -225,6 +226,46 @@
         "REQ-31"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-in-adminpage-tsx-ensure-the-payments-table-is-populated-with-all-records-returned-by-usegetallpayments-after-a-successful-internet-identity-login-debug-the-full-data-fetch-pipeline-1-confirm-usegetallpayments-is-enabled-once-the-authenticated-actor-is-ready-enabled-actor-isauthenticated-2-ensure-the-query-is-invalidated-and-refetched-immediately-after-login-so-fresh-data-is-loaded-without-a-manual-page-refresh-3-render-all-returned-payment-rows-in-the-table-full-name-email-address-masked-card-number-last-4-digits-expiry-date-and-amount-so-that-records-submitted-via-the-payment-form-are-visible-in-the-admin-view",
+      "title": "In `AdminPage.tsx`, ensure the payments table is populated with all records returned by `useGetAllPayments` after a successful Internet Identity login. Debug the full data-fetch pipeline: (1) confirm `useGetAllPayments` is enabled once the authenticated actor is ready (`enabled: !!actor && isAuthenticated`); (2) ensure the query is invalidated and refetched immediately after login so fresh data is loaded without a manual page refresh; (3) render all returned payment rows in the table — Full Name, Email, Address, masked Card Number (last 4 digits), Expiry Date, and Amount — so that records submitted via the payment form are visible in the admin view.",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-full-data-fetch-pipeline-in-usequeries-ts-and-adminpage-tsx-so-that-after-a-successful-internet-identity-login-usegetallpayments-fetches-and-the-payments-table-is-populated-with-all-records-returned-by-the-backend-ensure-1-usegetallpayments-is-only-enabled-when-the-authenticated-actor-is-non-null-and-isauthenticated-is-true-2-the-query-is-invalidated-and-immediately-refetched-after-login-completes-3-all-returned-rows-are-rendered-in-the-table-full-name-email-address-masked-card-number-showing-last-4-digits-expiry-date-amount-4-the-error-state-is-only-shown-after-all-retries-are-exhausted-not-while-retries-are-in-flight",
+      "title": "Fix the full data-fetch pipeline in `useQueries.ts` and `AdminPage.tsx` so that after a successful Internet Identity login, `useGetAllPayments` fetches and the payments table is populated with all records returned by the backend. Ensure: (1) `useGetAllPayments` is only enabled when the authenticated actor is non-null and `isAuthenticated` is true; (2) the query is invalidated and immediately refetched after login completes; (3) all returned rows are rendered in the table (Full Name, Email, Address, masked Card Number showing last 4 digits, Expiry Date, Amount); (4) the error state is only shown after all retries are exhausted, not while retries are in-flight.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-completely-rewrite-the-actor-initialisation-and-query-gating-logic-in-frontend-src-hooks-useactor-ts-and-frontend-src-hooks-usequeries-ts-the-rewrite-must-1-expose-an-actorready-boolean-that-is-false-until-the-authclient-has-fully-resolved-and-the-correct-identity-anonymous-or-authenticated-has-been-applied-to-the-actor-instance-2-ensure-the-actor-reference-is-stable-and-non-null-before-any-query-or-mutation-is-allowed-to-fire-3-for-usegetallpayments-set-enabled-actor-actorready-isauthenticated-and-configure-retry-3-with-exponential-back-off-retrydelay-attempt-math-min-1000-2-attempt-10000-4-after-a-successful-internet-identity-login-call-queryclient-invalidatequeries-getallpayments-so-the-table-refetches-automatically-without-a-manual-page-refresh-5-for-usesubmitpayment-gate-the-mutation-on-actor-actorready-and-add-retry-2-with-exponential-back-off-so-brief-startup-delays-do-not-surface-as-immediate-failures",
+      "title": "Completely rewrite the actor initialisation and query-gating logic in `frontend/src/hooks/useActor.ts` and `frontend/src/hooks/useQueries.ts`. The rewrite must: (1) expose an `actorReady` boolean that is `false` until the `AuthClient` has fully resolved and the correct identity (anonymous or authenticated) has been applied to the actor instance; (2) ensure the actor reference is stable and non-null before any query or mutation is allowed to fire; (3) for `useGetAllPayments`, set `enabled: !!actor && actorReady && isAuthenticated` and configure `retry: 3` with exponential back-off (`retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000)`); (4) after a successful Internet Identity login, call `queryClient.invalidateQueries(['getAllPayments'])` so the table refetches automatically without a manual page refresh; (5) for `useSubmitPayment`, gate the mutation on `!!actor && actorReady` and add `retry: 2` with exponential back-off so brief startup delays do not surface as immediate failures.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-pages-adminpage-tsx-to-1-show-a-loading-spinner-whenever-usegetallpayments-is-in-a-loading-or-retrying-state-do-not-render-the-error-ui-while-retries-are-still-in-flight-2-display-the-failed-to-load-payments-error-only-after-all-retries-are-exhausted-and-actorready-isauthenticated-are-confirmed-true-3-render-every-row-returned-by-the-query-full-name-email-address-masked-card-number-last-4-digits-expiry-date-amount-so-records-submitted-via-the-payment-form-appear-in-the-table-immediately-after-login-without-a-manual-refresh",
+      "title": "Update `frontend/src/pages/AdminPage.tsx` to: (1) show a loading spinner whenever `useGetAllPayments` is in a loading or retrying state (do not render the error UI while retries are still in-flight); (2) display the 'Failed to load payments' error only after all retries are exhausted and `actorReady && isAuthenticated` are confirmed true; (3) render every row returned by the query — Full Name, Email, Address, masked Card Number (last 4 digits), Expiry Date, Amount — so records submitted via the payment form appear in the table immediately after login without a manual refresh.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-components-paymentform-tsx-to-ensure-the-submit-button-is-disabled-with-a-loading-spinner-whenever-the-actor-is-not-yet-ready-actorready-preventing-the-payment-service-not-ready-error-from-being-shown-to-the-user-the-mutation-should-only-be-triggered-once-the-actor-is-confirmed-ready-if-a-submission-fails-after-all-retries-surface-the-actual-rejection-reason-from-the-backend-in-the-error-message-rather-than-a-generic-fallback-string",
+      "title": "Update `frontend/src/components/PaymentForm.tsx` to ensure the submit button is disabled with a loading spinner whenever the actor is not yet ready (`!actorReady`), preventing the 'Payment service not ready' error from being shown to the user. The mutation should only be triggered once the actor is confirmed ready. If a submission fails after all retries, surface the actual rejection reason from the backend in the error message rather than a generic fallback string.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -288,6 +329,30 @@
       "id": "AR-9",
       "summary": "Add a credit card visual element (light theme) to the payment form UI.",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Audit and fix the backend `getAllPayments` (or `getSubmissions`) query function in `backend/main.mo` to ensure that submitted payment records are correctly persisted in stable storage and returned by the query function. Verify that `submitPayment` writes to the same stable variable that `getAllPayments` reads from, and that no data is lost between updates.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Audit and fix the backend `getAllPayments` query function in `backend/main.mo` to ensure submitted payment records are correctly persisted in stable storage and returned. Verify that `submitPayment` writes to the same stable variable that `getAllPayments` reads from, that stable storage is not re-initialized on canister upgrade, and that no records are lost between upgrades or updates.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Audit and fix the backend `getAllPayments` query function in `backend/main.mo` to guarantee that all records written by `submitPayment` are persisted in stable storage and correctly returned by `getAllPayments`. Verify: (1) `submitPayment` appends to the same stable variable that `getAllPayments` reads from; (2) stable storage is not re-initialised on canister upgrade (use `preupgrade`/`postupgrade` hooks if needed); (3) no records are silently dropped or shadowed by a transient in-memory buffer. Add a defensive check so `getAllPayments` returns an empty array (not an error) when no records exist.",
+      "reqIds": [
+        "REQ-36"
+      ],
       "status": "pending"
     }
   ],

@@ -1,38 +1,98 @@
 {
   "kind": "build_request",
-  "title": "Fix 'Payment service not ready' error on payment form submission",
-  "projectName": "Payment Terminal",
+  "title": "Fix persistent admin payments table not loading and payment submission failures",
+  "projectName": "PaymentForm Pro",
   "priority": "high",
   "requirements": [
     {
-      "id": "REQ-31",
-      "text": "Diagnose and fix the 'Payment service not ready. Please wait a moment and try again.' error shown when submitting the payment form. Audit the actor initialization flow in `useActor.ts` and the `useSubmitPayment` mutation in `useQueries.ts`: ensure the anonymous actor is fully initialized and non-null before the mutation is allowed to fire (gate the mutation on `!!actor`). If the actor is not yet ready at submission time, surface a user-friendly loading state (e.g., disable the submit button with a spinner) rather than immediately throwing an error. Add at least 2 automatic retries with exponential back-off in `useSubmitPayment` for transient initialization or network errors so that brief actor startup delays do not surface as immediate failures.",
-      "target": "frontend",
+      "id": "REQ-36",
+      "text": "Audit and fix the backend `getAllPayments` query function in `backend/main.mo` to guarantee that all records written by `submitPayment` are persisted in stable storage and correctly returned by `getAllPayments`. Verify: (1) `submitPayment` appends to the same stable variable that `getAllPayments` reads from; (2) stable storage is not re-initialised on canister upgrade (use `preupgrade`/`postupgrade` hooks if needed); (3) no records are silently dropped or shadowed by a transient in-memory buffer. Add a defensive check so `getAllPayments` returns an empty array (not an error) when no records exist.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-latest"
         ],
         "quotes": [
-          "Payment service not ready. Please wait a moment and try again."
+          "same prob"
         ]
       },
       "acceptanceCriteria": [
-        "Submitting the payment form no longer shows 'Payment service not ready. Please wait a moment and try again.' when the actor is initializing.",
-        "The submit button is disabled (with a loading indicator) while the actor is not yet ready, preventing premature submission.",
-        "The `useSubmitPayment` mutation in `useQueries.ts` is gated with `enabled`/`mutationFn` guard so it does not execute until the actor instance is non-null.",
-        "Transient actor or network errors during submission are retried at least 2 times with exponential back-off before surfacing an error to the user.",
-        "After the actor is ready, a valid form submission completes successfully and shows the confirmation screen."
+        "`submitPayment` writes each new record to the stable variable used by `getAllPayments`.",
+        "`getAllPayments` returns all previously submitted records after a canister upgrade.",
+        "Calling `getAllPayments` on an empty store returns an empty array without throwing.",
+        "No in-memory buffer exists that would cause records to be lost on upgrade."
+      ]
+    },
+    {
+      "id": "REQ-37",
+      "text": "Completely rewrite the actor initialisation and query-gating logic in `frontend/src/hooks/useActor.ts` and `frontend/src/hooks/useQueries.ts`. The rewrite must: (1) expose an `actorReady` boolean that is `false` until the `AuthClient` has fully resolved and the correct identity (anonymous or authenticated) has been applied to the actor instance; (2) ensure the actor reference is stable and non-null before any query or mutation is allowed to fire; (3) for `useGetAllPayments`, set `enabled: !!actor && actorReady && isAuthenticated` and configure `retry: 3` with exponential back-off (`retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000)`); (4) after a successful Internet Identity login, call `queryClient.invalidateQueries(['getAllPayments'])` so the table refetches automatically without a manual page refresh; (5) for `useSubmitPayment`, gate the mutation on `!!actor && actorReady` and add `retry: 2` with exponential back-off so brief startup delays do not surface as immediate failures.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "same prob"
+        ]
+      },
+      "acceptanceCriteria": [
+        "`actorReady` is `false` during `AuthClient` initialisation and becomes `true` only after the identity is applied.",
+        "`useGetAllPayments` does not fire until `actorReady && isAuthenticated` are both true.",
+        "After Internet Identity login completes, `getAllPayments` is invalidated and refetched automatically.",
+        "`useSubmitPayment` does not fire while the actor is not ready; the submit button shows a disabled/spinner state instead.",
+        "Both hooks retry at least 2–3 times with exponential back-off before surfacing an error state."
+      ]
+    },
+    {
+      "id": "REQ-38",
+      "text": "Update `frontend/src/pages/AdminPage.tsx` to: (1) show a loading spinner whenever `useGetAllPayments` is in a loading or retrying state (do not render the error UI while retries are still in-flight); (2) display the 'Failed to load payments' error only after all retries are exhausted and `actorReady && isAuthenticated` are confirmed true; (3) render every row returned by the query — Full Name, Email, Address, masked Card Number (last 4 digits), Expiry Date, Amount — so records submitted via the payment form appear in the table immediately after login without a manual refresh.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "same prob"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A spinner is shown while the query is loading or retrying.",
+        "The error message is rendered only after all React Query retries are exhausted.",
+        "All payment rows returned by the backend are rendered in the table with correct column values.",
+        "Card numbers are masked to show only the last 4 digits.",
+        "The table populates automatically after login without requiring a page refresh."
+      ]
+    },
+    {
+      "id": "REQ-39",
+      "text": "Update `frontend/src/components/PaymentForm.tsx` to ensure the submit button is disabled with a loading spinner whenever the actor is not yet ready (`!actorReady`), preventing the 'Payment service not ready' error from being shown to the user. The mutation should only be triggered once the actor is confirmed ready. If a submission fails after all retries, surface the actual rejection reason from the backend in the error message rather than a generic fallback string.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-latest"
+        ],
+        "quotes": [
+          "same prob"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The submit button is disabled and shows a spinner while `actorReady` is false.",
+        "The 'Payment service not ready' error is never shown; users see a spinner instead.",
+        "After all retries are exhausted, the error message reflects the actual backend rejection reason when available.",
+        "Successful submissions still show the confirmation message and reset the form."
       ]
     }
   ],
   "constraints": [
-    "Do not modify files under frontend/src/hooks/useActor.ts, frontend/src/hooks/useInternetIdentity.ts, or frontend/src/main.tsx (immutable paths).",
-    "All Motoko logic must remain in backend/main.mo — do not split into multiple actors."
+    "Do not modify files listed in frontend.immutablePaths.",
+    "All Motoko logic must remain in backend/main.mo (single-actor architecture).",
+    "Preserve all existing payment form fields, validation logic, and light amber/gold theme."
   ],
   "nonGoals": [
-    "Changing the visual design or theme of the payment form.",
-    "Modifying the AdminPage or its data-fetch chain.",
-    "Altering the backend canister's submitPayment method signature."
+    "Changing the visual theme or color palette.",
+    "Adding new payment form fields.",
+    "Modifying the Internet Identity authentication flow itself.",
+    "Adding new admin features beyond displaying the payments table."
   ],
   "imageRequirements": {
     "required": [],

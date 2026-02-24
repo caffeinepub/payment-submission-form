@@ -1,28 +1,63 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix 'Payment service not ready' error on payment form submission",
+  "title": "Fix persistent admin payments table not loading and payment submission failures",
   "requirements": [
     {
-      "id": "REQ-31",
-      "summary": "Fix the 'Payment service not ready' error by ensuring the actor is fully initialized before allowing payment submission, adding retry logic with exponential back-off, and surfacing a user-friendly loading state when the actor is not yet ready",
+      "id": "REQ-37",
+      "summary": "Rewrite actor initialisation and query-gating logic in useActor.ts and useQueries.ts to expose actorReady boolean, ensure stable actor references before queries/mutations fire, implement retry with exponential back-off, and invalidate queries after Internet Identity login",
       "acceptanceCriteria": [
-        "Submitting the payment form no longer shows 'Payment service not ready. Please wait a moment and try again.' when the actor is initializing.",
-        "The submit button is disabled (with a loading indicator) while the actor is not yet ready, preventing premature submission.",
-        "The `useSubmitPayment` mutation in `useQueries.ts` is gated with `enabled`/`mutationFn` guard so it does not execute until the actor instance is non-null.",
-        "Transient actor or network errors during submission are retried at least 2 times with exponential back-off before surfacing an error to the user.",
-        "After the actor is ready, a valid form submission completes successfully and shows the confirmation screen."
+        "actorReady is false during AuthClient initialisation and becomes true only after the identity is applied.",
+        "useGetAllPayments does not fire until actorReady && isAuthenticated are both true.",
+        "After Internet Identity login completes, getAllPayments is invalidated and refetched automatically.",
+        "useSubmitPayment does not fire while the actor is not ready; the submit button shows a disabled/spinner state instead.",
+        "Both hooks retry at least 2–3 times with exponential back-off before surfacing an error state."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/hooks/useActor.ts",
+          "operation": "modify",
+          "description": "Rewrite to expose an actorReady boolean that remains false until AuthClient has fully resolved and the correct identity (anonymous or authenticated) has been applied to the actor instance. Ensure the actor reference is stable and non-null before any query or mutation is allowed. After a successful Internet Identity login, call queryClient.invalidateQueries(['getAllPayments']) so the table refetches automatically without a manual page refresh. The actorReady flag must become true only after the identity is confirmed and the actor is instantiated with that identity."
+        },
+        {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Modify the useSubmitPayment mutation to gate execution on actor readiness by checking `!!actor` before allowing the mutationFn to fire. Add retry logic with at least 2 retries and exponential back-off (e.g., using React Query's `retry` and `retryDelay` options) to handle transient actor initialization or network errors gracefully. Ensure the mutation does not execute if the actor is null, preventing premature 'Payment service not ready' errors."
-        },
+          "description": "Update useGetAllPayments to set enabled: !!actor && actorReady && isAuthenticated and configure retry: 3 with exponential back-off using retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000). Update useSubmitPayment to gate the mutation on !!actor && actorReady and add retry: 2 with exponential back-off so brief startup delays do not surface as immediate failures. Both hooks must wait for actorReady before firing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-38",
+      "summary": "Update AdminPage.tsx to show loading spinner during query loading/retrying states, display error only after retries exhausted, and render all payment rows with masked card numbers and all required columns",
+      "acceptanceCriteria": [
+        "A spinner is shown while the query is loading or retrying.",
+        "The error message is rendered only after all React Query retries are exhausted.",
+        "All payment rows returned by the backend are rendered in the table with correct column values.",
+        "Card numbers are masked to show only the last 4 digits.",
+        "The table populates automatically after login without requiring a page refresh."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminPage.tsx",
+          "operation": "modify",
+          "description": "Update to show a loading spinner whenever useGetAllPayments is in a loading or retrying state (do not render the error UI while retries are still in-flight). Display the 'Failed to load payments' error only after all retries are exhausted and actorReady && isAuthenticated are confirmed true. Render every row returned by the query with columns: Full Name, Email, Address, masked Card Number (last 4 digits), Expiry Date, Amount. Ensure records submitted via the payment form appear in the table immediately after login without a manual refresh."
+        }
+      ]
+    },
+    {
+      "id": "REQ-39",
+      "summary": "Update PaymentForm.tsx to disable submit button with spinner when actor not ready, prevent 'Payment service not ready' error from showing, and surface actual backend rejection reasons in error messages",
+      "acceptanceCriteria": [
+        "The submit button is disabled and shows a spinner while actorReady is false.",
+        "The 'Payment service not ready' error is never shown; users see a spinner instead.",
+        "After all retries are exhausted, the error message reflects the actual backend rejection reason when available.",
+        "Successful submissions still show the confirmation message and reset the form."
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/components/PaymentForm.tsx",
           "operation": "modify",
-          "description": "Update the PaymentForm component to detect when the actor is not yet ready (using the `isFetching` state from useActor) and disable the submit button with a loading spinner or indicator during actor initialization. Ensure the form does not allow submission until the actor is fully initialized and non-null. Add visual feedback (e.g., 'Connecting to payment service...') so users understand the system is initializing. Wire the mutation's retry state to show appropriate feedback if retries are in progress."
+          "description": "Ensure the submit button is disabled with a loading spinner whenever the actor is not yet ready (!actorReady), preventing the 'Payment service not ready' error from being shown to the user. The mutation should only be triggered once the actor is confirmed ready. If a submission fails after all retries, surface the actual rejection reason from the backend in the error message rather than a generic fallback string. Consume the actorReady flag from useActor to gate the submit button state."
         }
       ]
     }

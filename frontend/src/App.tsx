@@ -8,7 +8,7 @@ export default function App() {
   const [view, setView] = useState<View>('payment');
 
   if (view === 'admin') {
-    return <AdminPage onBack={() => setView('payment')} />;
+    return <AdminPage onNavigateToPayment={() => setView('payment')} />;
   }
 
   return <PaymentPage onNavigateAdmin={() => setView('admin')} />;

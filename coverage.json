@@ -1,37 +1,68 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T19:34:15.841Z",
+  "generatedAt": "2026-02-24T20:23:38.815Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 4,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-31",
-        "summary": "Diagnose and fix the 'Payment service not ready. Please wait a moment and try again.' error shown when submitting the payment form. Audit the actor initialization flow in `useActor.ts` and the `useSubmitPayment` mutation in `useQueries.ts`: ensure the anonymous actor is fully initialized and non-null before the mutation is allowed to fire (gate the mutation on `!!actor`). If the actor is not yet ready at submission time, surface a user-friendly loading state (e.g., disable the submit button with a spinner) rather than immediately throwing an error. Add at least 2 automatic retries with exponential back-off in `useSubmitPayment` for transient initialization or network errors so that brief actor startup delays do not surface as immediate failures.",
+        "id": "REQ-36",
+        "summary": "Audit and fix the backend `getAllPayments` query function in `backend/main.mo` to guarantee that all records written by `submitPayment` are persisted in stable storage and correctly returned by `getAllPayments`. Verify: (1) `submitPayment` appends to the same stable variable that `getAllPayments` reads from; (2) stable storage is not re-initialised on canister upgrade (use `preupgrade`/`postupgrade` hooks if needed); (3) no records are silently dropped or shadowed by a transient in-memory buffer. Add a defensive check so `getAllPayments` returns an empty array (not an error) when no records exist.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-37",
+        "summary": "Completely rewrite the actor initialisation and query-gating logic in `frontend/src/hooks/useActor.ts` and `frontend/src/hooks/useQueries.ts`. The rewrite must: (1) expose an `actorReady` boolean that is `false` until the `AuthClient` has fully resolved and the correct identity (anonymous or authenticated) has been applied to the actor instance; (2) ensure the actor reference is stable and non-null before any query or mutation is allowed to fire; (3) for `useGetAllPayments`, set `enabled: !!actor && actorReady && isAuthenticated` and configure `retry: 3` with exponential back-off (`retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000)`); (4) after a successful Internet Identity login, call `queryClient.invalidateQueries(['getAllPayments'])` so the table refetches automatically without a manual page refresh; (5) for `useSubmitPayment`, gate the mutation on `!!actor && actorReady` and add `retry: 2` with exponential back-off so brief startup delays do not surface as immediate failures.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/hooks/useActor.ts",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-38",
+        "summary": "Update `frontend/src/pages/AdminPage.tsx` to: (1) show a loading spinner whenever `useGetAllPayments` is in a loading or retrying state (do not render the error UI while retries are still in-flight); (2) display the 'Failed to load payments' error only after all retries are exhausted and `actorReady && isAuthenticated` are confirmed true; (3) render every row returned by the query — Full Name, Email, Address, masked Card Number (last 4 digits), Expiry Date, Amount — so records submitted via the payment form appear in the table immediately after login without a manual refresh.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/AdminPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/AdminPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-39",
+        "summary": "Update `frontend/src/components/PaymentForm.tsx` to ensure the submit button is disabled with a loading spinner whenever the actor is not yet ready (`!actorReady`), preventing the 'Payment service not ready' error from being shown to the user. The mutation should only be triggered once the actor is confirmed ready. If a submission fails after all retries, surface the actual rejection reason from the backend in the error message rather than a generic fallback string.",
+        "status": "implemented",
+        "plannedFiles": [
           "frontend/src/components/PaymentForm.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
           "frontend/src/components/PaymentForm.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
     "frontend/src/components/PaymentForm.tsx",
     "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/AdminPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

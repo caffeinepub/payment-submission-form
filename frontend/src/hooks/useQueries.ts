@@ -1,13 +1,35 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useActor } from './useActor';
-import { useInternetIdentity } from './useInternetIdentity';
-import type { Payment } from '../backend';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useActor } from "./useActor";
+import { useInternetIdentity } from "./useInternetIdentity";
+import { Payment } from "../backend";
+
+export function useGetAllPayments() {
+  const { actor, isFetching: isActorFetching } = useActor();
+  const { identity } = useInternetIdentity();
+  const isAuthenticated = !!identity;
+
+  // actorReady: actor exists and is not currently being fetched/recreated
+  const actorReady = !!actor && !isActorFetching;
+
+  return useQuery<Payment[]>({
+    queryKey: ["payments", "all"],
+    queryFn: async () => {
+      if (!actor) return [];
+      const result = await actor.getAllPayments();
+      return result;
+    },
+    enabled: actorReady && isAuthenticated,
+    retry: 3,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+  });
+}
 
 export function useSubmitPayment() {
   const { actor, isFetching: isActorFetching } = useActor();
   const queryClient = useQueryClient();
 
-  const isActorReady = !!actor && !isActorFetching;
+  // actorReady: actor exists and is not currently being fetched/recreated
+  const actorReady = !!actor && !isActorFetching;
 
   const mutation = useMutation({
     mutationFn: async (data: {
@@ -19,78 +41,60 @@ export function useSubmitPayment() {
       cvv: string;
       amount: bigint;
     }) => {
-      // Guard: actor must be ready before executing
-      if (!actor || isActorFetching) {
-        throw new Error('__actor_not_ready__');
+      if (!actor || !actorReady) {
+        throw new Error("Payment service not ready. Please wait and try again.");
       }
-
-      try {
-        await actor.submitPayment(
-          data.fullName,
-          data.address,
-          data.email,
-          data.cardNumber,
-          data.expiryDate,
-          data.cvv,
-          data.amount
-        );
-      } catch (err: unknown) {
-        // Parse canister rejection messages for user-friendly errors
-        const message = err instanceof Error ? err.message : String(err);
-        if (message.includes('Unauthorized')) {
-          throw new Error('You are not authorized to submit payments.');
-        }
-        if (message.includes('network') || message.includes('fetch') || message.includes('timeout')) {
-          throw new Error('Network error. Please check your connection and try again.');
-        }
-        throw new Error(`Payment failed: ${message}`);
-      }
+      await actor.submitPayment(
+        data.fullName,
+        data.address,
+        data.email,
+        data.cardNumber,
+        data.expiryDate,
+        data.cvv,
+        data.amount
+      );
     },
-    // Retry up to 2 times with exponential back-off for transient errors,
-    // but do NOT retry if the actor is simply not ready yet.
-    retry: (failureCount, error) => {
-      if (error instanceof Error && error.message === '__actor_not_ready__') {
-        return false;
-      }
-      return failureCount < 2;
-    },
-    retryDelay: (attemptIndex) => Math.min(800 * 2 ** attemptIndex, 4000),
+    retry: 2,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['payments'] });
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
     },
   });
 
-  return { ...mutation, isActorReady };
+  return { ...mutation, actorReady };
 }
 
-export function useGetAllPayments() {
-  const { actor, isFetching: isActorFetching } = useActor();
-  const { identity, isInitializing } = useInternetIdentity();
+export function useGetCallerUserProfile() {
+  const { actor, isFetching: actorFetching } = useActor();
 
-  const isAuthenticated = !!identity;
-  const principal = identity?.getPrincipal().toString() ?? 'anonymous';
-
-  // Only enable the query when:
-  // 1. Identity initialization is complete (not restoring from storage)
-  // 2. The actor is not currently being fetched/recreated
-  // 3. The actor instance is available
-  // 4. The user is authenticated (identity is present)
-  const isReady = !isInitializing && !isActorFetching && !!actor && isAuthenticated;
-
-  return useQuery<Payment[]>({
-    // Include principal in query key so the query re-runs when identity changes
-    queryKey: ['payments', principal],
+  const query = useQuery({
+    queryKey: ["currentUserProfile"],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not ready');
-      return actor.getAllPayments();
+      if (!actor) throw new Error("Actor not available");
+      return actor.getCallerUserProfile();
     },
-    enabled: isReady,
-    staleTime: 0,
-    refetchOnWindowFocus: true,
-    // Retry up to 3 times with exponential back-off to handle transient
-    // actor initialization failures after login.
-    // With retry:3, failureCount reaches 4 when all retries are exhausted.
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 8000),
+    enabled: !!actor && !actorFetching,
+    retry: false,
+  });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
+}
+
+export function useSaveCallerUserProfile() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (profile: { name: string }) => {
+      if (!actor) throw new Error("Actor not available");
+      await actor.saveCallerUserProfile(profile);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["currentUserProfile"] });
+    },
   });
 }

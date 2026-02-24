@@ -1,22 +1,15 @@
 import Map "mo:core/Map";
-import Array "mo:core/Array";
-import Text "mo:core/Text";
 import Iter "mo:core/Iter";
-import Runtime "mo:core/Runtime";
+import Text "mo:core/Text";
 import Principal "mo:core/Principal";
 import Stripe "stripe/stripe";
 import AccessControl "authorization/access-control";
-
+import Runtime "mo:core/Runtime";
+import OutCall "http-outcalls/outcall";
 import MixinStorage "blob-storage/Mixin";
 import MixinAuthorization "authorization/MixinAuthorization";
-import OutCall "http-outcalls/outcall";
-
 
 actor {
-  let accessControlState = AccessControl.initState();
-  include MixinStorage();
-  include MixinAuthorization(accessControlState);
-
   var nextId = 0;
 
   public type Payment = {
@@ -33,10 +26,14 @@ actor {
     name : Text;
   };
 
-  var payments = Map.empty<Nat, Payment>();
-  let userProfiles = Map.empty<Text, UserProfile>();
+  var accessControlState = AccessControl.initState();
 
-  // Stripe integration
+  include MixinStorage();
+  include MixinAuthorization(accessControlState);
+
+  var payments = Map.empty<Nat, Payment>();
+  var userProfiles = Map.empty<Text, UserProfile>();
+
   var configuration : ?Stripe.StripeConfiguration = null;
 
   public query func isStripeConfigured() : async Bool {
@@ -57,11 +54,17 @@ actor {
     };
   };
 
-  public func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
+  public shared ({ caller }) func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+        Runtime.trap("Unauthorized: Only users can check session status");
+    };
     await Stripe.getSessionStatus(getStripeConfiguration(), sessionId, transform);
   };
 
   public shared ({ caller }) func createCheckoutSession(items : [Stripe.ShoppingItem], successUrl : Text, cancelUrl : Text) : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+        Runtime.trap("Unauthorized: Only users can create checkout sessions");
+    };
     await Stripe.createCheckoutSession(getStripeConfiguration(), caller, items, successUrl, cancelUrl, transform);
   };
 
@@ -69,7 +72,7 @@ actor {
     OutCall.transform(input);
   };
 
-  // Payment submission
+  // New payment submission function
   public shared ({ caller }) func submitPayment(
     fullName : Text,
     address : Text,
@@ -79,6 +82,9 @@ actor {
     cvv : Text,
     amount : Nat,
   ) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can submit payments");
+    };
     let payment : Payment = {
       fullName;
       address;
@@ -93,15 +99,18 @@ actor {
     nextId += 1;
   };
 
-  // Admin-only: exposes sensitive financial data of all users
   public query ({ caller }) func getAllPayments() : async [Payment] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can view all payments");
     };
+
+    if (payments.isEmpty()) {
+      return [];
+    };
+
     payments.values().toArray();
   };
 
-  // Get the caller's own user profile (requires user role)
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can get profiles");
@@ -109,7 +118,6 @@ actor {
     userProfiles.get(caller.toText());
   };
 
-  // Save the caller's own user profile (requires user role)
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save profiles");
@@ -117,7 +125,6 @@ actor {
     userProfiles.add(caller.toText(), profile);
   };
 
-  // Get another user's profile: caller must be that user or an admin
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
